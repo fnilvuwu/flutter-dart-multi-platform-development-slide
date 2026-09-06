@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flutter &amp; Dart — Slide Presenter</title>
+<style>
+  :root { --accent:#E32428; --accent-strong:#C1121F; --bg:#3A3F44; --panel:#2B2F33; --ink:#ECECEC; --muted:#9AA0A6; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #toolbar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    background: var(--panel);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    z-index: 10;
+    flex-wrap: wrap;
+  }
+  #toolbar .brand { font-weight: 700; font-size: 15px; letter-spacing:.4px; white-space:nowrap; }
+  #toolbar .brand span { color: var(--accent); }
+  .spacer { flex: 1; }
+  .btn {
+    cursor:pointer; border:none; border-radius:8px;
+    padding:8px 14px; font-size:13px; font-weight:600;
+    background: #464C52; color: var(--ink);
+    transition: transform .12s ease, background .15s ease;
+    user-select:none;
+  }
+  .btn:hover { background:#52585F; transform:translateY(-1px); }
+  .btn:active { transform:scale(.96); }
+  .btn.primary { background: var(--accent); color:#fff; }
+  .btn.primary:hover { background: var(--accent-strong); }
+  .btn.sm { padding:6px 10px; font-size:12px; }
+  .seg {
+    display:flex; gap:4px; padding:4px; border-radius:9px; background:#1E2124;
+  }
+  .seg button {
+    cursor:pointer; border:none; border-radius:6px; padding:7px 13px;
+    font-size:12.5px; font-weight:600; background:transparent; color:var(--muted);
+    transition:background .15s ease, color .15s ease;
+  }
+  .seg button.active { background: var(--accent); color:#fff; }
+  #counter { font-variant-numeric: tabular-nums; font-size:13px; color:var(--muted); white-space:nowrap; }
+  #gotoBtn { display:flex; align-items:center; gap:6px; }
+  #gotoBtn .caret { font-size:10px; opacity:.7; }
+  .goto-menu {
+    display:none; position:absolute; top:calc(100% + 6px); right:0;
+    background:#1E2124; border:1px solid rgba(255,255,255,.1);
+    border-radius:10px; padding:12px; min-width:250px;
+    box-shadow:0 12px 36px rgba(0,0,0,.55); z-index:100;
+  }
+  .goto-menu.open { display:block; }
+  .goto-menu label { display:block; font-size:11.5px; color:var(--muted); margin:8px 0 4px; font-weight:600; }
+  .goto-menu label:first-child { margin-top:0; }
+  .goto-menu select, .goto-menu input {
+    width:100%; box-sizing:border-box; padding:7px 9px; border-radius:7px;
+    border:1px solid rgba(255,255,255,.15); background:#2B2F33; color:var(--ink);
+    font-size:13px; font-family:inherit;
+  }
+  .goto-menu select:focus, .goto-menu input:focus { outline:none; border-color:var(--accent); }
+  .goto-menu .hint { font-size:11px; color:var(--muted); margin-top:3px; font-variant-numeric:tabular-nums; }
+  .goto-menu .btn.primary { width:100%; margin-top:10px; }
+  body.presenting #toolbar { display:none; }
+  body.presenting #stage-wrap { padding:0; }
+  body.presenting #stage iframe.frame.active { box-shadow:none; border-radius:0; }
+  #stage-wrap {
+    flex:1; position:relative; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #stage { position:relative; }
+  #stage iframe.frame {
+    position:absolute; left:0; top:0;
+    display:none; border:none; width:1280px; height:720px;
+    transform-origin: top left;
+    background:#fff;
+    box-shadow: 0 24px 70px rgba(0,0,0,.5);
+    border-radius:2px;
+    opacity:0; pointer-events:none;
+    transition: opacity .25s ease;
+  }
+  #stage iframe.frame.active { display:block; opacity:1; pointer-events:auto; }
+  .edge {
+    position:absolute; top:0; height:100%; width:64px; z-index:5;
+    cursor:pointer; opacity:0; transition:opacity .2s ease;
+  }
+  #stage-wrap:hover .edge { opacity:.35; }
+  #stage-wrap .edge:hover { opacity:.6; }
+  .edge:hover::after {
+    content:''; position:absolute; top:50%; left:50%;
+    width:22px; height:22px; transform:translate(-50%,-50%);
+    border:3px solid rgba(255,255,255,.85); border-radius:50%;
+    background:var(--accent);
+    -webkit-mask: radial-gradient(circle 8px at center, transparent 96%, #000 100%);
+            mask: radial-gradient(circle 8px at center, transparent 96%, #000 100%);
+  }
+  .edge.prev { left:0; }
+  .edge.next { right:0; }
+  #loading {
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    background:var(--bg); z-index:4; font-size:14px; color:var(--muted); letter-spacing:1px;
+  }
+  #toast {
+    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+    background:#1E2124; color:var(--ink); padding:9px 16px; border-radius:8px;
+    font-size:13px; box-shadow:0 8px 24px rgba(0,0,0,.4);
+    opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:20;
+  }
+  .dropdown { position:relative; }
+  .dropdown-menu {
+    display:none; position:absolute; top:calc(100% + 6px); left:0;
+    background:#1E2124; border:1px solid rgba(255,255,255,.1);
+    border-radius:10px; padding:6px 0; min-width:320px; max-height:480px;
+    overflow-y:auto; box-shadow:0 12px 36px rgba(0,0,0,.55); z-index:100;
+  }
+  .dropdown-menu.open { display:block; }
+  .dropdown-menu::-webkit-scrollbar { width:6px; }
+  .dropdown-menu::-webkit-scrollbar-track { background:transparent; }
+  .dropdown-menu::-webkit-scrollbar-thumb { background:#444; border-radius:3px; }
+  .dropdown-item {
+    display:flex; align-items:center; gap:8px;
+    padding:9px 14px; font-size:13px; color:var(--muted);
+    cursor:pointer; transition:background .12s ease, color .12s ease;
+  }
+  .dropdown-item:hover { background:rgba(255,255,255,.06); color:var(--ink); }
+  .dropdown-item.active { background:var(--accent); color:#fff; }
+  .dropdown-item .num {
+    display:inline-block; width:22px; text-align:right;
+    font-variant-numeric:tabular-nums; font-weight:600; opacity:.6;
+  }
+  .dropdown-item.active .num { opacity:1; }
+  .dropdown-sep { height:1px; background:rgba(255,255,255,.08); margin:4px 10px; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <div class="brand">Flutter<span> &amp; Dart</span> — Presenter</div>
+  <div class="dropdown" id="sessionDropdown">
+    <button class="btn" id="dropdownBtn" title="Pilih sesi">📋 Pilih Sesi ▾</button>
+    <div class="dropdown-menu" id="dropdownMenu"></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn" id="pdfBtn" title="Print slide yang sedang tampil" onclick="printSlide()">🖨 Print</button>
+  <button class="btn" id="fullscreenBtn" title="Layar penuh (F)">⛶ Fullscreen</button>
+  <button class="btn" id="prevBtn" title="Sebelumnya (←)">◀ Prev</button>
+  <div class="dropdown" id="gotoDropdown">
+    <button class="btn sm" id="gotoBtn" title="Lompat ke sesi/slide (G)"><span id="counter">Sesi 1 · Slide 1/20</span><span class="caret">▾</span></button>
+    <div class="goto-menu" id="gotoMenu">
+      <label for="gotoSession">Sesi</label>
+      <select id="gotoSession"></select>
+      <label for="gotoSlide">Slide ke</label>
+      <input id="gotoSlide" type="number" min="1" value="1">
+      <div class="hint" id="gotoHint"></div>
+      <button class="btn primary" id="gotoGo">Buka ➜</button>
+    </div>
+  </div>
+  <button class="btn primary" id="nextBtn" title="Berikutnya (→)">Next ▶</button>
+</div>
+
+<div id="stage-wrap">
+  <div class="edge prev" id="edgePrev" title="Sebelumnya"></div>
+  <div class="edge next" id="edgeNext" title="Berikutnya"></div>
+  <div id="stage">
+    <div id="loading">Memuat slide…</div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const SESSIONS = [
+    { title: 'Sesi 1 — Pengenalan Flutter', dir: 'sesi-01-pengenalan-flutter', files: [
+      '01-cover-pengenalan-flutter.html', '02-perkenalan-pemateri.html', '03-kenapa-flutter-career.html',
+      '04-analogi-flutter.html', '05-apa-itu-flutter.html', '06-kenapa-flutter.html',
+      '07-live-code-hello-flutter.html', '08-practice-hello-flutter.html', '09-flutter-vs-native.html',
+      '10-what-if-tanpa-crossplatform.html', '11-live-code-perbandingan-syntax.html', '12-arsitektur-flutter.html',
+      '13-live-code-widget-pertama.html', '14-practice-build-widget.html', '15-what-if-widget-sama.html',
+      '16-kuis-interaktif.html', '17-analogi-widget-tree.html', '18-ringkasan-sesi1.html',
+      '19-tugas-pr.html', '20-penutup-sesi1.html'
+    ] },
+    { title: 'Sesi 2 — Dart Basics', dir: 'sesi-02-dart-basics', files: [
+      '01-cover-dart-basics.html', '02-perkenalan-pemateri-ringkas.html', '03-kenapa-dart-flutter-career.html',
+      '04-definisi-variabel.html', '05-live-code-variabel.html', '06-practice-variabel.html',
+      '07-misi-tukar-nilai.html', '08-analogi-variabel.html', '09-what-if-tanpa-tipe.html',
+      '10-analogi-string-interpolation.html', '11-live-code-string.html', '12-practice-string.html',
+      '11b-practice-string-2.html', '13-what-if-salah-tulis.html', '14-konsep-operator.html',
+      '15-live-code-operator.html', '16-practice-operator.html', '17-what-if-urutan-operasi.html',
+      '18-konsep-operator-logika.html', '19-live-code-logika.html', '20-practice-logika.html',
+      '21-what-if-equals.html', '22-kuis-dart.html', '23-ringkasan-sesi2.html'
+    ] },
+    { title: 'Sesi 3 — Control Flow', dir: 'sesi-03-control-flow', files: [
+      '01-cover-control-flow.html', '02-analogi-if-else.html', '03-definisi-conditional.html',
+      '04-live-code-conditional.html', '05-practice-conditional.html', '06-what-if-tanpa-else.html',
+      '07-konsep-switch.html', '08-live-code-switch.html', '09-practice-switch.html',
+      '10-what-if-switch-break.html', '11-analogi-loop.html', '12-konsep-loop.html',
+      '13-live-code-loop.html', '14-practice-loop.html', '15-what-if-infinite-loop.html',
+      '16-analogi-function.html', '17-definisi-function.html', '18-live-code-function.html',
+      '19-practice-function.html', '20-what-if-tanpa-return.html', '21-kuis-control-flow.html',
+      '22-ringkasan-sesi3.html'
+    ] },
+    { title: 'Sesi 4 — Widget Dasar', dir: 'sesi-04-widget-dasar', files: [
+      '01-cover-widget-dasar.html', '02-analogi-widget.html', '03-definisi-widget.html',
+      '04-live-code-text.html', '05-practice-text.html', '06-what-if-widget-kosong.html',
+      '07-konsep-stateless-stateful.html', '08-live-code-stateful.html', '09-practice-like-button.html',
+      '10-what-if-tanpa-setstate.html', '11-konsep-container.html', '12-live-code-container.html',
+      '13-practice-card.html', '14-what-if-container-kosong.html', '15-konsep-icon-image.html',
+      '16-live-code-icon.html', '17-practice-profile.html', '18-what-if-image-salah.html',
+      '19-kuis-widget.html', '20-ringkasan-sesi4.html'
+    ] },
+    { title: 'Sesi 5 — Layout', dir: 'sesi-05-layout', files: [
+      '01-cover-layout.html', '02-mengapa-layout-penting.html', '03-row-column.html',
+      '04-mainaxis-crossaxis.html', '05-flex-expanded.html', '06-what-if-tanpa-expanded.html',
+      '07-stack-positioned.html', '08-gridview.html', '09-listview.html',
+      '10-singlechildscrollview.html', '11-sizedbox-container.html', '12-mediasquery-responsivitas.html',
+      '13-wrap-spacer.html', '14-aspectratio-flexible.html', '15-praktik-layout-aplikasi.html',
+      '16-latihan-layout.html', '17-kuis-layout.html', '18-ringkasan-sesi5.html'
+    ] },
+    { title: 'Sesi 6 — State Management', dir: 'sesi-06-state-management', files: [
+      '01-cover-state.html', '02-apa-itu-state.html', '03-setstate.html',
+      '04-widget-lifecycle-1.html', '04-widget-lifecycle-2.html', '05-what-if-tanpa-setstate.html', '06-stateful-vs-stateless.html',
+      '07-provider-pattern.html', '08-changenotifier.html', '09-provider-setup-1.html', '09-provider-setup-2.html',
+      '10-watch-vs-read.html', '11-praktik-counter-provider-1.html', '11-praktik-counter-provider-2.html', '12-multi-provider.html',
+      '13-provider-vs-setstate.html', '14-latihan-todo-list.html', '15-kuis-state-management.html',
+      '16-error-handling.html', '17-best-practices.html', '18-ringkasan-sesi6.html'
+    ] },
+    { title: 'Sesi 7 — Navigasi', dir: 'sesi-07-navigasi', files: [
+      '01-cover-navigasi.html', '02-mengapa-navigasi.html', '03-navigator-push.html',
+      '04-navigator-pop.html', '05-what-if-tanpa-pop.html', '06-named-routes.html',
+      '07-passing-data-1.html', '07-passing-data-2.html', '08-return-data.html', '09-route-not-found.html',
+      '10-push-replacement.html', '11-bottom-navigation.html', '12-drawer-navigation-1.html', '12-drawer-navigation-2.html',
+      '13-praktik-multi-halaman.html', '14-latihan-aplikasi-login-1.html', '14-latihan-aplikasi-login-2.html', '15-kuis-navigasi.html',
+      '16-perbandingan-navigasi.html', '17-best-practices-navigasi.html', '18-ringkasan-sesi7.html'
+    ] },
+    { title: 'Sesi 8 — Input & Form', dir: 'sesi-08-input-form', files: [
+      '01-cover-input.html', '02-daftar-isi.html', '03-textformfield-dasar.html',
+      '04-textformfield-properti.html', '05-decorations.html', '06-controller.html',
+      '07-form-validation.html', '08-validator-fungsi.html', '09-form-class-1.html', '09-form-class-2.html', '09-form-class-2b.html',
+      '10-elevated-button.html', '11-text-button-outlined.html', '12-checkbox.html',
+      '13-radio-button.html', '14-switch.html', '15-analogi-formulir.html',
+      '16-what-if.html', '17-quiz.html', '18-ringkasan-sesi8.html'
+    ] },
+    { title: 'Sesi 9 — Data Storage', dir: 'sesi-09-data-storage', files: [
+      '01-cover-storage.html', '02-daftar-isi.html', '03-overview-storage.html',
+      '04-shared-preferences-dasar.html', '05-shared-preferences-crud.html', '06-json-parsing.html',
+      '07-json-model-1.html', '07-json-model-2.html', '07-json-model-2b.html',
+      '08-sqlite-intro.html', '09-sqlite-database-1.html', '09-sqlite-database-2.html', '09-sqlite-database-2b.html',
+      '10-sqlite-crud-1.html', '10-sqlite-crud-2.html', '10-sqlite-crud-2b.html',
+      '11-file-storage.html', '12-path-provider.html',
+      '13-analogi-gudang.html', '14-what-if.html', '15-perbandingan.html',
+      '16-quiz.html', '17-praktikum-1.html', '17-praktikum-2.html', '17-praktikum-2b.html', '18-ringkasan-sesi9.html'
+    ] },
+    { title: 'Sesi 10 — Networking & Proyek', dir: 'sesi-10-networking-proyek', files: [
+      '01-cover-networking.html', '02-daftar-isi.html', '03-http-dasar.html',
+      '04-http-request-1.html', '04-http-request-2.html', '04-http-request-2b.html',
+      '05-json-parsing-1.html', '05-json-parsing-2.html',
+      '06-api-integration.html', '07-image-loading-1.html', '07-image-loading-2.html',
+      '08-error-handling-1.html', '08-error-handling-2.html', '08-error-handling-2b.html',
+      '09-loading-states-1.html', '09-loading-states-2.html', '09-loading-states-2b.html',
+      '10-api-integration-1.html', '10-api-integration-2.html', '10-api-integration-2b.html',
+      '11-analogi-restoran.html', '12-what-if.html',
+      '13-mini-project-intro.html', '14-weather-api-1.html', '14-weather-api-2.html', '15-weather-model-1.html', '15-weather-model-2.html',
+      '16-weather-service-1.html', '16-weather-service-2.html', '16-weather-service-2b.html',
+      '17-weather-ui-1.html', '17-weather-ui-2.html', '17-weather-ui-3.html',
+      '18-build-deploy.html', '19-quiz.html', '20-ringkasan-kursus.html'
+    ] }
+  ];
+
+  function slideUrl(sesIdx, slideIdx) {
+    return SESSIONS[sesIdx].dir + '/' + SESSIONS[sesIdx].files[slideIdx];
+  }
+
+  let currentSessionIdx = 0;
+  let currentSlide = 0;
+  let activeFrame = null;
+  let frames = [];
+  const POOL = 3;
+
+  const stage = document.getElementById('stage');
+  const stageWrap = document.getElementById('stage-wrap');
+  const counter = document.getElementById('counter');
+  const loading = document.getElementById('loading');
+  const toast = document.getElementById('toast');
+  const dropdownMenu = document.getElementById('dropdownMenu');
+  const dropdownBtn = document.getElementById('dropdownBtn');
+  const dropdownWrap = document.getElementById('sessionDropdown');
+  const gotoMenu = document.getElementById('gotoMenu');
+  const gotoBtn = document.getElementById('gotoBtn');
+  const gotoWrap = document.getElementById('gotoDropdown');
+  const gotoSession = document.getElementById('gotoSession');
+  const gotoSlide = document.getElementById('gotoSlide');
+  const gotoHint = document.getElementById('gotoHint');
+  const POS_KEY = 'slidePresenterPos';
+
+  function buildDropdown() {
+    let html = '';
+    SESSIONS.forEach((ses, i) => {
+      html += '<div class="dropdown-item' + (i === currentSessionIdx ? ' active' : '') + '" data-idx="' + i + '">';
+      html += '<span class="num">' + (i + 1) + '</span>';
+      html += '<span>' + ses.title + ' (' + ses.files.length + ')</span>';
+      html += '</div>';
+    });
+    dropdownMenu.innerHTML = html;
+    dropdownMenu.querySelectorAll('.dropdown-item').forEach(el => {
+      el.addEventListener('click', () => {
+        loadSlide(+el.dataset.idx, 0);
+        closeDropdown();
+      });
+    });
+  }
+
+  function updateDropdownActive() {
+    dropdownMenu.querySelectorAll('.dropdown-item').forEach(el => {
+      el.classList.toggle('active', +el.dataset.idx === currentSessionIdx);
+    });
+  }
+
+  function toggleDropdown() {
+    dropdownMenu.classList.toggle('open');
+  }
+
+  function closeDropdown() {
+    dropdownMenu.classList.remove('open');
+  }
+
+  dropdownBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(); });
+  document.addEventListener('click', (e) => {
+    if (!dropdownWrap.contains(e.target)) closeDropdown();
+    if (!gotoWrap.contains(e.target)) closeGoto();
+  });
+
+  function buildGotoSessions() {
+    gotoSession.innerHTML = '';
+    SESSIONS.forEach((ses, i) => {
+      const o = document.createElement('option');
+      o.value = i;
+      o.textContent = (i + 1) + ' — ' + ses.title + ' (' + ses.files.length + ')';
+      gotoSession.appendChild(o);
+    });
+  }
+
+  function syncGoto() {
+    gotoSession.value = currentSessionIdx;
+    gotoSlide.value = currentSlide + 1;
+    updateGotoHint();
+  }
+
+  function updateGotoHint() {
+    const si = Math.max(0, Math.min(SESSIONS.length - 1, +gotoSession.value || 0));
+    gotoHint.textContent = '1 – ' + SESSIONS[si].files.length + ' · Enter untuk buka';
+  }
+
+  function toggleGoto() {
+    const willOpen = !gotoMenu.classList.contains('open');
+    closeDropdown();
+    gotoMenu.classList.toggle('open');
+    if (willOpen) {
+      syncGoto();
+      setTimeout(() => gotoSlide.focus(), 50);
+      gotoSlide.select();
+    }
+  }
+
+  function closeGoto() {
+    gotoMenu.classList.remove('open');
+  }
+
+  function gotoSubmit() {
+    const si = Math.max(0, Math.min(SESSIONS.length - 1, +gotoSession.value || 0));
+    const total = SESSIONS[si].files.length;
+    let li = Math.round(+gotoSlide.value || 1) - 1;
+    li = Math.max(0, Math.min(total - 1, li));
+    closeGoto();
+    loadSlide(si, li);
+  }
+
+  gotoBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleGoto(); });
+  gotoSession.addEventListener('change', updateGotoHint);
+  document.getElementById('gotoGo').addEventListener('click', gotoSubmit);
+  gotoSlide.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); gotoSubmit(); }
+    e.stopPropagation();
+  });
+  gotoSession.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); gotoSubmit(); }
+    e.stopPropagation();
+  });
+
+  function makeFrame() {
+    const f = document.createElement('iframe');
+    f.className = 'frame';
+    f.title = 'Slide';
+    f.dataset.key = '';
+    f.dataset.loaded = '0';
+    f.addEventListener('load', () => {
+      f.dataset.loaded = '1';
+      if (f.dataset.key === slideUrl(currentSessionIdx, currentSlide)) {
+        loading.style.display = 'none';
+        displayFrame(f);
+        preloadNext();
+      }
+    });
+    stage.appendChild(f);
+    return f;
+  }
+
+  function displayFrame(f) {
+    frames.forEach(x => x.classList.remove('active'));
+    f.classList.add('active');
+    activeFrame = f;
+    requestAnimationFrame(() => { f.style.opacity = '1'; });
+  }
+
+  function loadSlide(sesIdx, slideIdx) {
+    currentSessionIdx = Math.max(0, Math.min(SESSIONS.length - 1, sesIdx));
+    const total = SESSIONS[currentSessionIdx].files.length;
+    currentSlide = Math.max(0, Math.min(total - 1, slideIdx));
+
+    const url = slideUrl(currentSessionIdx, currentSlide);
+    let f = frames.find(x => x.dataset.key === url && x.dataset.loaded === '1');
+    if (f) {
+      loading.style.display = 'none';
+      displayFrame(f);
+      preloadNext();
+    } else {
+      f = frames.find(x => x !== activeFrame && x.dataset.key !== preloadUrl()) || frames.find(x => x !== activeFrame) || frames[0];
+      f.dataset.key = url;
+      f.dataset.loaded = '0';
+      f.classList.remove('active');
+      f.style.opacity = '0';
+      f.src = url;
+      loading.style.display = 'flex';
+    }
+    updateCounter();
+    updateDropdownActive();
+    savePos();
+  }
+
+  function savePos() {
+    try {
+      localStorage.setItem(POS_KEY, JSON.stringify({ ses: currentSessionIdx, slide: currentSlide }));
+    } catch (e) {}
+  }
+
+  function loadPos() {
+    try {
+      const raw = localStorage.getItem(POS_KEY);
+      if (!raw) return null;
+      const p = JSON.parse(raw);
+      if (typeof p.ses !== 'number' || typeof p.slide !== 'number') return null;
+      const si = Math.max(0, Math.min(SESSIONS.length - 1, p.ses));
+      const li = Math.max(0, Math.min(SESSIONS[si].files.length - 1, p.slide));
+      return { ses: si, slide: li };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function preloadUrl() {
+    const ses = SESSIONS[currentSessionIdx];
+    if (currentSlide + 1 < ses.files.length) return slideUrl(currentSessionIdx, currentSlide + 1);
+    if (currentSessionIdx + 1 < SESSIONS.length) return slideUrl(currentSessionIdx + 1, 0);
+    return '';
+  }
+
+  function preloadNext() {
+    const url = preloadUrl();
+    if (!url) return;
+    if (frames.some(x => x.dataset.key === url)) return;
+    const idle = frames.find(x => x !== activeFrame && x.dataset.loaded === '1' && x.dataset.key !== url);
+    if (idle) {
+      idle.dataset.key = url;
+      idle.dataset.loaded = '0';
+      idle.src = url;
+    }
+  }
+
+  function updateCounter() {
+    const ses = SESSIONS[currentSessionIdx];
+    counter.textContent = ses.title.split(' — ')[0] + ' · Slide ' + (currentSlide + 1) + '/' + ses.files.length;
+  }
+
+  function next() {
+    const ses = SESSIONS[currentSessionIdx];
+    if (currentSlide < ses.files.length - 1) {
+      loadSlide(currentSessionIdx, currentSlide + 1);
+    } else if (currentSessionIdx < SESSIONS.length - 1) {
+      loadSlide(currentSessionIdx + 1, 0);
+    } else {
+      toastMsg('Sudah di slide terakhir');
+    }
+  }
+
+  function prev() {
+    if (currentSlide > 0) {
+      loadSlide(currentSessionIdx, currentSlide - 1);
+    } else if (currentSessionIdx > 0) {
+      loadSlide(currentSessionIdx - 1, 0);
+    } else {
+      toastMsg('Sudah di slide pertama');
+    }
+  }
+
+  function toastMsg(msg) {
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    clearTimeout(toastMsg._t);
+    toastMsg._t = setTimeout(() => toast.style.opacity = '0', 1200);
+  }
+
+  function fit() {
+    const presenting = document.body.classList.contains('presenting');
+    const pad = presenting ? 0 : 28;
+    const availW = stageWrap.clientWidth - pad * 2;
+    const availH = stageWrap.clientHeight - pad * 2;
+    const scale = Math.min(availW / 1280, availH / 720);
+    const w = 1280 * scale, h = 720 * scale;
+    frames.forEach(f => { f.style.transform = 'scale(' + scale + ')'; });
+    stage.style.width = w + 'px';
+    stage.style.height = h + 'px';
+  }
+
+  // --- Listen for key events forwarded from slide iframes ---
+  window.addEventListener('message', (e) => {
+    const d = e.data;
+    if (d && d.type === 'deck-nav' && typeof d.key === 'string') {
+      handleNavKey(d.key);
+    }
+  });
+
+  // --- Controls ---
+  document.getElementById('nextBtn').addEventListener('click', next);
+  document.getElementById('prevBtn').addEventListener('click', prev);
+  document.getElementById('edgeNext').addEventListener('click', next);
+  document.getElementById('edgePrev').addEventListener('click', prev);
+
+  function handleNavKey(key) {
+    switch (key) {
+      case 'ArrowRight': case 'PageDown': case ' ': next(); break;
+      case 'ArrowLeft':  case 'PageUp':   prev(); break;
+      case 'Home': loadSlide(currentSessionIdx, 0); break;
+      case 'End': loadSlide(currentSessionIdx, SESSIONS[currentSessionIdx].files.length - 1); break;
+      case 'Escape': closeDropdown(); closeGoto(); break;
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.key === 'g' || e.key === 'G') { e.preventDefault(); toggleGoto(); return; }
+    const keys = ['ArrowRight', 'ArrowLeft', 'PageDown', 'PageUp', ' ', 'Home', 'End', 'f', 'F'];
+    if (keys.indexOf(e.key) === -1) return;
+    e.preventDefault();
+    handleNavKey(e.key);
+  });
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  }
+  document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+
+  document.addEventListener('fullscreenchange', () => {
+    document.body.classList.toggle('presenting', !!document.fullscreenElement);
+    fit();
+  });
+
+  function printSlide() {
+    if (activeFrame && activeFrame.contentWindow) {
+      try {
+        activeFrame.contentWindow.focus();
+        activeFrame.contentWindow.print();
+      } catch (e) {
+        toastMsg('Tidak bisa print slide ini');
+      }
+    } else {
+      toastMsg('Belum ada slide yang tampil');
+    }
+  }
+
+  window.addEventListener('resize', fit);
+  window.addEventListener('load', () => {
+    buildDropdown();
+    buildGotoSessions();
+    for (let k = 0; k < POOL; k++) frames.push(makeFrame());
+    const saved = loadPos();
+    if (saved) {
+      loadSlide(saved.ses, saved.slide);
+      toastMsg('Melanjutkan: Sesi ' + (saved.ses + 1) + ' · Slide ' + (saved.slide + 1));
+    } else {
+      loadSlide(0, 0);
+    }
+    fit();
+  });
+</script>
+</body>
+</html>

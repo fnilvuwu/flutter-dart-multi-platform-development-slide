@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>21 · Quiz: Control Flow</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { accent: '#E32428', 'accent-soft': '#FBE8E8', 'accent-strong': '#C1121F', paper: '#FFFFFF', ink: '#1F1F1F' },
+    animation: { 'fade-up': 'fade-up .8s cubic-bezier(.22,.61,.36,1) both', 'pop': 'pop .5s ease-out both', 'float': 'floaty 6s ease-in-out infinite', 'spin-slower': 'spin-slow 18s linear infinite' }
+  }}
+};
+</script>
+<style>
+@keyframes fade-up { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pop { 0% { transform:scale(.8); opacity:0; } 70% { transform:scale(1.05); } 100% { transform:scale(1); opacity:1; } }
+@keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+@keyframes spin-slow { to { transform:rotate(360deg); } }
+[data-stagger] > * { opacity:0; animation:fade-up .8s ease-out forwards; }
+[data-stagger] > *:nth-child(1){ animation-delay:.10s; }
+[data-stagger] > *:nth-child(2){ animation-delay:.22s; }
+[data-stagger] > *:nth-child(3){ animation-delay:.34s; }
+[data-stagger] > *:nth-child(4){ animation-delay:.46s; }
+</style>
+<script>if (window.self !== window.top) document.documentElement.classList.add('presenter');</script>
+<style>html.presenter body{margin:0!important}html.presenter .relative.mx-auto.my-8{margin:0!important}html.presenter .fixed.right-6{display:none!important}</style>
+</head>
+<body class="bg-[#3A3F44]">
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState } = React;
+function Slide() {
+  const [notes, setNotes] = useState(false);
+  const [currentQ, setCurrentQ] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [showResult, setShowResult] = useState(false);
+  const questions = [
+    {
+      q: 'Apa output dari kode berikut?\n\nint x = 10;\nif (x > 5) {\n  print("Besar");\n} else {\n  print("Kecil");\n}',
+      options: ['Besar', 'Kecil', 'Error', 'Tidak ada output'],
+      correct: 0,
+      explanation: 'x=10 > 5, jadi blok if dijalankan.'
+    },
+    {
+      q: 'Apa yang terjadi jika switch case tidak memiliki break?',
+      options: ['Error compile', 'Fallthrough ke case berikutnya', 'Program berhenti', 'Loop tak terbatas'],
+      correct: 1,
+      explanation: 'Tanpa break, eksekusi jatuh ke case berikutnya (fallthrough).'
+    },
+    {
+      q: 'Manakah yang benar untuk while loop?',
+      options: ['Body pasti dijalankan sekali', 'Body bisa tidak dijalankan sama sekali', 'Harus ada break', 'Tidak perlu kondisi'],
+      correct: 1,
+      explanation: 'While mengecek kondisi SEBELUM body. Jika false dari awal, body tidak dijalankan.'
+    },
+    {
+      q: 'Apa yang dimaksud dengan "return" dalam fungsi?',
+      options: ['Menghentikan program', 'Mengembalikan nilai ke pemanggil', 'Mengulang kode', 'Mendeklarasikan variabel'],
+      correct: 1,
+      explanation: 'Return mengembalikan nilai dari fungsi ke tempat fungsi dipanggil.'
+    },
+    {
+      q: 'Manakah yang merupakan infinite loop?',
+      options: ['for(int i=0;i<10;i++)', 'while(true){}', 'for(int i=10;i>0;i--)', 'int i=0; while(i<5){i++;}'],
+      correct: 1,
+      explanation: 'while(true) selalu true, sehingga loop tidak pernah berhenti.'
+    }
+  ];
+  const handleAnswer = (idx) => {
+    setAnswers({...answers, [currentQ]: idx});
+  };
+  const getScore = () => {
+    let score = 0;
+    questions.forEach((q, i) => {
+      if (answers[i] === q.correct) score++;
+    });
+    return score;
+  };
+  return (
+    <div className="relative mx-auto my-8 w-[1280px] h-[720px] overflow-hidden bg-paper shadow-2xl flex flex-col">
+      <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full border-[22px] border-accent/90 animate-spin-slower"></div>
+      <div className="absolute left-72 top-20 w-14 h-14 bg-accent rotate-45 opacity-15 animate-float"></div>
+      <header className="relative z-10 px-14 pt-8" data-stagger>
+        <img src="../screenesia-logo.png" alt="Screenesia" className="absolute top-6 right-8 z-20 h-9 w-auto pointer-events-none" />
+        <div className="text-sm font-extrabold tracking-[2.5px] uppercase text-accent">Quiz</div>
+        <h1 className="mt-2 text-4xl font-black leading-tight text-ink">Control Flow Quiz</h1>
+        <div className="mt-3 h-2 w-24 rounded bg-accent"></div>
+      </header>
+      <main className="relative z-10 mt-3 flex-1 px-14" data-stagger>
+        <div className="flex gap-6">
+          <div className="flex-1 min-w-0">
+            <div className="rounded-2xl bg-slate-50 border-2 border-slate-200 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-accent">Soal {currentQ + 1} / {questions.length}</span>
+                <div className="flex gap-1">
+                  {questions.map((_, i) => (
+                    <div key={i} className={`w-3 h-3 rounded-full ${i === currentQ ? 'bg-accent' : answers[i] !== undefined ? (answers[i] === questions[i].correct ? 'bg-green-500' : 'bg-red-500') : 'bg-slate-300'}`}></div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-xl bg-[#1e1e2e] p-3 mb-2">
+                <pre className="text-xs text-[#cdd6f4] font-mono whitespace-pre-wrap leading-snug">{questions[currentQ].q}</pre>
+              </div>
+              <div className="space-y-1.5">
+                {questions[currentQ].options.map((opt, idx) => (
+                  <button key={idx} onClick={() => handleAnswer(idx)} className={`w-full text-left rounded-xl px-3 py-2 text-sm border-2 transition-all ${answers[currentQ] === idx ? (idx === questions[currentQ].correct ? 'border-green-500 bg-green-50 text-green-700' : 'border-red-500 bg-red-50 text-red-700') : 'border-slate-200 bg-white hover:border-accent hover:bg-accent-50'}`}>
+                    <span className="font-bold mr-2">{String.fromCharCode(65 + idx)}.</span> {opt}
+                  </button>
+                ))}
+              </div>
+              {answers[currentQ] !== undefined && (
+                <div className={`mt-2 rounded-xl p-2.5 ${answers[currentQ] === questions[currentQ].correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                  <p className={`text-sm font-bold ${answers[currentQ] === questions[currentQ].correct ? 'text-green-700' : 'text-red-700'}`}>
+                    {answers[currentQ] === questions[currentQ].correct ? '✅ Benar!' : '❌ Salah!'}
+                  </p>
+                  <p className="text-xs text-slate-600 mt-1">{questions[currentQ].explanation}</p>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex-1 min-w-0 flex flex-col justify-center items-center">
+            <div className="rounded-2xl border-2 border-accent/20 p-5 bg-accent-50 text-center w-full">
+              <h3 className="text-base font-bold text-accent mb-2">Progress</h3>
+              <div className="text-5xl font-black text-accent mb-1">{Object.keys(answers).length}/{questions.length}</div>
+              <p className="text-sm text-slate-600">Soal terjawab</p>
+              {Object.keys(answers).length === questions.length && (
+                <div className="mt-3 rounded-xl bg-white p-3 border border-accent/20">
+                  <p className="text-2xl font-black text-accent">{getScore()} / {questions.length}</p>
+                  <p className="text-sm text-slate-600 mt-1">Skor Akhir</p>
+                </div>
+              )}
+            </div>
+            <div className="mt-3 flex gap-3 w-full">
+              <button onClick={() => setCurrentQ(Math.max(0, currentQ - 1))} disabled={currentQ === 0} className="flex-1 rounded-xl bg-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 transition hover:bg-slate-300 disabled:opacity-40">← Prev</button>
+              <button onClick={() => setCurrentQ(Math.min(questions.length - 1, currentQ + 1))} disabled={currentQ === questions.length - 1} className="flex-1 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white transition hover:bg-accent-strong disabled:opacity-40">Next →</button>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer className="relative z-10 mt-2 flex items-center justify-between border-t border-stone-300 px-14 pb-7 pt-3 text-sm text-accent">
+        <span>#UpgradeYourSkillNow</span>
+        <span>www.screenesia.com</span>
+      </footer>
+      <button onClick={() => setNotes(!notes)} className="fixed right-6 bottom-6 z-50 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95">Catatan Pengajar</button>
+      {notes && (<div className="fixed left-6 bottom-6 z-40 w-[460px] rounded-xl border-2 border-accent bg-white p-5 shadow-2xl animate-pop"><h3 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-accent">Catatan Pengajar</h3><p className="text-[15px] leading-relaxed text-slate-700">Quiz interaktif ini menggunakan useState untuk tracking jawaban. Siswa bisa mengerjakan satu per satu dan melihat penjelasan setelah menjawab.</p></div>)}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Slide />);
+</script>
+<!-- deck-nav forwarder (presenter) -->
+<script>
+(function () {
+  try {
+    if (window.self !== window.top) {
+      window.addEventListener('keydown', function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        var keys = ['ArrowRight', 'ArrowLeft', 'PageDown', 'PageUp', ' ', 'Home', 'End', 'f', 'F'];
+        if (keys.indexOf(e.key) === -1) return;
+        e.preventDefault();
+        window.parent.postMessage({ type: 'deck-nav', key: e.key }, '*');
+      });
+    }
+  } catch (err) {}
+})();
+</script>
+</body>
+</html>

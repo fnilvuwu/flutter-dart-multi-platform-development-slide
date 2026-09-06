@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>18 · What If: Image Path Salah</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { accent: '#E32428', 'accent-soft': '#FBE8E8', 'accent-strong': '#C1121F', paper: '#FFFFFF', ink: '#1F1F1F' },
+    animation: { 'fade-up': 'fade-up .8s cubic-bezier(.22,.61,.36,1) both', 'pop': 'pop .5s ease-out both', 'float': 'floaty 6s ease-in-out infinite', 'spin-slower': 'spin-slow 18s linear infinite' }
+  }}
+};
+</script>
+<style>
+@keyframes fade-up { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pop { 0% { transform:scale(.8); opacity:0; } 70% { transform:scale(1.05); } 100% { transform:scale(1); opacity:1; } }
+@keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+@keyframes spin-slow { to { transform:rotate(360deg); } }
+[data-stagger] > * { opacity:0; animation:fade-up .8s ease-out forwards; }
+[data-stagger] > *:nth-child(1){ animation-delay:.10s; }
+[data-stagger] > *:nth-child(2){ animation-delay:.22s; }
+[data-stagger] > *:nth-child(3){ animation-delay:.34s; }
+[data-stagger] > *:nth-child(4){ animation-delay:.46s; }
+</style>
+<script>if (window.self !== window.top) document.documentElement.classList.add('presenter');</script>
+<style>html.presenter body{margin:0!important}html.presenter .relative.mx-auto.my-8{margin:0!important}html.presenter .fixed.right-6{display:none!important}</style>
+</head>
+<body class="bg-[#3A3F44]">
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState } = React;
+function Slide() {
+  const [notes, setNotes] = useState(false);
+  const [showError, setShowError] = useState(false);
+  return (
+    <div className="relative mx-auto my-8 w-[1280px] h-[720px] overflow-hidden bg-paper shadow-2xl flex flex-col">
+      <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full border-[22px] border-accent/90 animate-spin-slower"></div>
+      <div className="absolute left-72 top-20 w-14 h-14 bg-accent rotate-45 opacity-15 animate-float"></div>
+      <header className="relative z-10 px-14 pt-12" data-stagger>
+        <img src="../screenesia-logo.png" alt="Screenesia" className="absolute top-6 right-8 z-20 h-9 w-auto pointer-events-none" />
+        <div className="text-sm font-extrabold tracking-[2.5px] uppercase text-accent">WHAT IF?</div>
+        <h1 className="mt-2 text-6xl font-black leading-tight text-ink">Image Path Salah?</h1>
+        <div className="mt-4 h-2 w-24 rounded bg-accent"></div>
+      </header>
+      <main className="relative z-10 mt-6 flex-1 px-14" data-stagger>
+        <div className="flex gap-8 items-start">
+          <div className="flex-1 space-y-6">
+            <div className="rounded-2xl bg-red-50 border-2 border-red-200 p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="text-3xl">💥</div>
+                <div className="font-bold text-lg text-red-700">Scenario</div>
+              </div>
+              <p className="text-slate-700 text-lg">Apa yang terjadi jika path gambar <span className="font-bold text-red-600">salah</span> atau file tidak ditemukan?</p>
+            </div>
+            <div className="bg-slate-800 rounded-xl p-5 font-mono text-xs leading-relaxed">
+              <div className="text-red-400 text-xs mb-2">// ❌ Path salah!</div>
+              <div><span className="text-purple-300">Image</span>.<span className="text-purple-300">asset</span>(</div>
+              <div className="pl-4"><span className="text-orange-300">'assets/foto_yang_tidak_ada.png'</span></div>
+              <div>)</div>
+              <div className="mt-3 text-red-400 text-xs">// Error: Unable to load asset</div>
+            </div>
+          </div>
+          <div className="w-[400px] space-y-4">
+            <button onClick={() => setShowError(!showError)} className="w-full rounded-xl bg-red-500 px-6 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95">
+              {showError ? 'Tutup' : 'Lihat Error'}
+            </button>
+            {showError && (
+              <div className="animate-pop space-y-4">
+                <div className="rounded-xl bg-red-50 border-2 border-red-200 p-5">
+                  <div className="font-bold text-red-700 mb-3">❌ Error Output:</div>
+                  <div className="bg-slate-900 rounded-lg p-4 font-mono text-xs text-red-300 leading-relaxed">
+                    <div>Exception: Unable to load asset</div>
+                    <div>"assets/foto_yang_tidak_ada.png"</div>
+                    <div className="mt-2 text-slate-500">The asset does not exist or has not been</div>
+                    <div className="text-slate-500">loaded into the asset bundle.</div>
+                  </div>
+                </div>
+                <div className="rounded-xl bg-green-50 border border-green-200 p-5 text-sm">
+                  <div className="font-bold text-green-700 mb-2">✅ Solusi:</div>
+                  <ul className="space-y-2 text-slate-600">
+                    <li>1. Cek path file di pubspec.yaml</li>
+                    <li>2. Pastikan file ada di folder assets/</li>
+                    <li>3. Restart app setelah mengubah asset</li>
+                    <li>4. Gunakan errorBuilder untuk fallback</li>
+                  </ul>
+                </div>
+                <div className="bg-slate-800 rounded-lg p-4 font-mono text-xs">
+                  <div className="text-green-400 text-xs mb-2">// ✅ Dengan fallback</div>
+                  <div><span className="text-purple-300">Image</span>.<span className="text-purple-300">asset</span>(</div>
+                  <div className="pl-4"><span className="text-orange-300">'assets/photo.png'</span>,</div>
+                  <div className="pl-4"><span className="text-amber-300">errorBuilder</span>: (ctx, err, st) =&gt;</div>
+                  <div className="pl-8"><span className="text-purple-300">Icon</span>(<span className="text-purple-300">Icons</span>.<span className="text-green-300">broken_image</span>)</div>
+                  <div>)</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+      <footer className="relative z-10 mt-6 flex items-center justify-between border-t border-stone-300 px-14 pb-7 pt-3 text-sm text-accent">
+        <span>#UpgradeYourSkillNow</span>
+        <span>www.screenesia.com</span>
+      </footer>
+      <button onClick={() => setNotes(!notes)} className="fixed right-6 bottom-6 z-50 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95">Catatan Pengajar</button>
+      {notes && (<div className="fixed left-6 bottom-6 z-40 w-[460px] rounded-xl border-2 border-accent bg-white p-5 shadow-2xl animate-pop"><h3 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-accent">Catatan Pengajar</h3><p className="text-[15px] leading-relaxed text-slate-700">Error image path sangat umum. Ajarkan errorBuilder sebagai best practice untuk production apps.</p></div>)}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Slide />);
+</script>
+<!-- deck-nav forwarder (presenter) -->
+<script>
+(function () {
+  try {
+    if (window.self !== window.top) {
+      window.addEventListener('keydown', function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        var keys = ['ArrowRight', 'ArrowLeft', 'PageDown', 'PageUp', ' ', 'Home', 'End', 'f', 'F'];
+        if (keys.indexOf(e.key) === -1) return;
+        e.preventDefault();
+        window.parent.postMessage({ type: 'deck-nav', key: e.key }, '*');
+      });
+    }
+  } catch (err) {}
+})();
+</script>
+</body>
+</html>

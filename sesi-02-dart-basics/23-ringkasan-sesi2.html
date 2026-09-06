@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>23 · ringkasan sesi2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { accent: '#E32428', 'accent-soft': '#FBE8E8', 'accent-strong': '#C1121F', paper: '#FFFFFF', ink: '#1F1F1F' },
+    animation: { 'fade-up': 'fade-up .8s cubic-bezier(.22,.61,.36,1) both', 'pop': 'pop .5s ease-out both', 'float': 'floaty 6s ease-in-out infinite', 'spin-slower': 'spin-slow 18s linear infinite' }
+  }}
+};
+</script>
+<style>
+@keyframes fade-up { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pop { 0% { transform:scale(.8); opacity:0; } 70% { transform:scale(1.05); } 100% { transform:scale(1); opacity:1; } }
+@keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+@keyframes spin-slow { to { transform:rotate(360deg); } }
+[data-stagger] > * { opacity:0; animation:fade-up .8s ease-out forwards; }
+[data-stagger] > *:nth-child(1){ animation-delay:.10s; }
+[data-stagger] > *:nth-child(2){ animation-delay:.22s; }
+[data-stagger] > *:nth-child(3){ animation-delay:.34s; }
+[data-stagger] > *:nth-child(4){ animation-delay:.46s; }
+</style>
+<script>if (window.self !== window.top) document.documentElement.classList.add('presenter');</script>
+<style>html.presenter body{margin:0!important}html.presenter .relative.mx-auto.my-8{margin:0!important}html.presenter .fixed.right-6{display:none!important}</style>
+</head>
+<body class="bg-[#3A3F44]">
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState } = React;
+function Slide() {
+  const [notes, setNotes] = useState(false);
+  const [expanded, setExpanded] = useState(null);
+  const topics = [
+    {
+      judul: 'Variabel & Tipe Data',
+      icon: '📦',
+      items: ['String, int, double, bool', 'Deklarasi: TipeData nama = nilai;', 'var untuk inferensi tipe', 'const untuk nilai tetap'],
+      color: 'bg-blue-50 border-blue-300',
+    },
+    {
+      judul: 'String Interpolation',
+      icon: '🔤',
+      items: ['$variabel untuk sisipkan nilai', '${ekspresi} untuk operasi', 'Hanya dalam kutip ganda ("...")', 'Lebih rapi dari concatenation (+)'],
+      color: 'bg-purple-50 border-purple-300',
+    },
+    {
+      judul: 'Operator Aritmatika',
+      icon: '🔢',
+      items: ['+, -, *, / (double result)', '~/ untuk pembagian bulat', '% untuk modulus (sisa)', 'PEMDAS berlaku untuk urutan'],
+      color: 'bg-amber-50 border-amber-300',
+    },
+    {
+      judul: 'Operator Perbandingan & Logika',
+      icon: '⚖️',
+      items: ['==, !=, <, >, <=, >=', '&& (AND), || (OR), ! (NOT)', 'Menghasilkan nilai boolean', '== untuk cek, = untuk assign'],
+      color: 'bg-green-50 border-green-300',
+    },
+    {
+      judul: 'Kesalahan Umum',
+      icon: '⚠️',
+      items: ['Lupa titik koma (;)', 'Tipe data wajib dideklarasi', '$ hanya di kutip ganda ("...")', '= (bukan ==) di if statement'],
+      color: 'bg-red-50 border-red-300',
+    },
+  ];
+  return (
+    <div className="relative mx-auto my-8 w-[1280px] h-[720px] overflow-hidden bg-paper shadow-2xl flex flex-col">
+      <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full border-[22px] border-accent/90 animate-spin-slower"></div>
+      <div className="absolute left-72 top-20 w-14 h-14 bg-accent rotate-45 opacity-15 animate-float"></div>
+      <header className="relative z-10 px-14 pt-8" data-stagger>
+        <img src="../screenesia-logo.png" alt="Screenesia" className="absolute top-6 right-8 z-20 h-9 w-auto pointer-events-none" />
+        <div className="text-sm font-extrabold tracking-[2.5px] uppercase text-accent">Ringkasan</div>
+        <h1 className="mt-2 text-4xl font-black leading-tight text-ink">Sesi 2: Dart Programming Basics</h1>
+        <div className="mt-3 h-2 w-24 rounded bg-accent"></div>
+      </header>
+      <main className="relative z-10 mt-3 flex-1 px-14" data-stagger>
+        <div className="grid grid-cols-5 gap-2 mb-3">
+          {topics.map((t, i) => (
+            <button key={i} onClick={() => setExpanded(expanded === i ? null : i)} className={`rounded-xl border-2 ${t.color} p-3 text-left transition-all hover:shadow-md ${expanded === i ? 'ring-2 ring-accent shadow-lg' : ''}`}>
+              <div className="text-2xl mb-1">{t.icon}</div>
+              <div className="text-sm font-bold text-stone-700 mb-1">{t.judul}</div>
+              {expanded === i && (
+                <div className="space-y-1 animate-pop">
+                  {t.items.map((item, j) => (
+                    <div key={j} className="flex items-start gap-2 text-xs text-stone-600">
+                      <span className="text-accent mt-0.5">✓</span>
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+        <div className="bg-accent/5 border border-accent/15 rounded-xl p-3">
+          <div className="text-sm font-bold text-accent uppercase tracking-wide mb-1.5">Poin Kunci yang Harus Diingat</div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-stone-700">
+            <div className="flex items-start gap-2"><span className="text-accent font-bold">1.</span><span>Dart adalah bahasa <strong>statically typed</strong> — semua variabel punya tipe data.</span></div>
+            <div className="flex items-start gap-2"><span className="text-accent font-bold">2.</span><span>String interpolation (<code className="bg-accent/10 px-1 rounded text-accent">$nama</code>) lebih clean dari concatenation.</span></div>
+            <div className="flex items-start gap-2"><span className="text-accent font-bold">3.</span><span>Gunakan <code className="bg-accent/10 px-1 rounded text-accent">~/</code> untuk pembagian bulat, <code className="bg-accent/10 px-1 rounded text-accent">%</code> untuk modulus.</span></div>
+            <div className="flex items-start gap-2"><span className="text-accent font-bold">4.</span><span>Selalu gunakan <code className="bg-accent/10 px-1 rounded text-accent">==</code> (bukan <code className="bg-accent/10 px-1 rounded text-accent">=</code>) di if statement.</span></div>
+          </div>
+        </div>
+        <div className="mt-1.5 flex items-center justify-center gap-3">
+          <span className="rounded-full bg-accent/10 px-4 py-1 text-xs font-bold text-accent">Next: Control Flow (if/else/switch)</span>
+          <span className="rounded-full bg-accent/10 px-4 py-1 text-xs font-bold text-accent">Next: Loops (for/while)</span>
+        </div>
+      </main>
+      <footer className="relative z-10 mt-2 flex items-center justify-between border-t border-stone-300 px-14 pb-7 pt-3 text-sm text-accent">
+        <span>#UpgradeYourSkillNow</span>
+        <span>www.screenesia.com</span>
+      </footer>
+      <button onClick={() => setNotes(!notes)} className="fixed right-6 bottom-6 z-50 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95">Catatan Pengajar</button>
+      {notes && (<div className="fixed left-6 bottom-6 z-40 w-[460px] rounded-xl border-2 border-accent bg-white p-5 shadow-2xl animate-pop"><h3 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-accent">Catatan Pengajar</h3><p className="text-[15px] leading-relaxed text-slate-700">Slide penutup sesi 2. Klik topic untuk expand detail. Tanyakan siswa apakah ada pertanyaan. Preview materi selanjutnya: Control Flow dan Loops. Sebelum pulang, berikan PR: buat program sederhana dengan variabel dan operator.</p></div>)}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Slide />);
+</script>
+<!-- deck-nav forwarder (presenter) -->
+<script>
+(function () {
+  try {
+    if (window.self !== window.top) {
+      window.addEventListener('keydown', function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        var keys = ['ArrowRight', 'ArrowLeft', 'PageDown', 'PageUp', ' ', 'Home', 'End', 'f', 'F'];
+        if (keys.indexOf(e.key) === -1) return;
+        e.preventDefault();
+        window.parent.postMessage({ type: 'deck-nav', key: e.key }, '*');
+      });
+    }
+  } catch (err) {}
+})();
+</script>
+</body>
+</html>

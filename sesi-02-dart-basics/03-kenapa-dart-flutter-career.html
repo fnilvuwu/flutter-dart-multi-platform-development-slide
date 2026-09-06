@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>if (window.self !== window.top) document.documentElement.classList.add('presenter');</script>
+<style>html.presenter body{margin:0!important}html.presenter .relative.mx-auto.my-8{margin:0!important}html.presenter .fixed.right-6{display:none!important}</style>
+<title>03 Â· kenapa dart flutter career</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { accent: '#E32428', 'accent-soft': '#FBE8E8', 'accent-strong': '#C1121F', paper: '#FFFFFF', ink: '#1F1F1F' },
+    animation: { 'fade-up': 'fade-up .8s cubic-bezier(.22,.61,.36,1) both', 'pop': 'pop .5s ease-out both', 'float': 'floaty 6s ease-in-out infinite', 'spin-slower': 'spin-slow 18s linear infinite' }
+  }}
+};
+</script>
+<style>
+@keyframes fade-up { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pop { 0% { transform:scale(.8); opacity:0; } 70% { transform:scale(1.05); } 100% { transform:scale(1); opacity:1; } }
+@keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+@keyframes spin-slow { to { transform:rotate(360deg); } }
+[data-stagger] > * { opacity:0; animation:fade-up .8s ease-out forwards; }
+[data-stagger] > *:nth-child(1){ animation-delay:.10s; }
+[data-stagger] > *:nth-child(2){ animation-delay:.22s; }
+[data-stagger] > *:nth-child(3){ animation-delay:.34s; }
+[data-stagger] > *:nth-child(4){ animation-delay:.46s; }
+</style>
+</head>
+<body class="bg-[#3A3F44]">
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState } = React;
+function Slide() {
+  const [notes, setNotes] = useState(false);
+  const cards = [
+    { big: 'Dart', cap: 'bahasa Flutter', title: 'Kenapa Dart?', desc: 'Dart adalah bahasa yang digunakan Flutter — type-safe, modern, dan mudah dipelajari jika sudah tahu Java/C#.', soft: true },
+    { big: 'Rp8–15 jt', cap: 'gaji junior / bulan', title: 'Career opportunity', desc: 'Pasar kerja mobile multiplatform ramai — banyak lowongan untuk pemula Flutter/Dart.', soft: false },
+    { big: '2 jt+', cap: 'developer Flutter', title: 'Komunitas besar', desc: 'Flutter dipakai Google, BMW, Alibaba. Komunitas aktif dan banyak sumber belajar gratis.', soft: false }
+  ];
+  const evid = ['500 rb+ aplikasi di Play Store', 'dipakai Google · BMW · Alibaba', 'hot reload = belajar lebih cepat'];
+  return (
+    <div className="relative mx-auto my-8 w-[1280px] h-[720px] overflow-hidden bg-paper shadow-2xl flex flex-col">
+      <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full border-[22px] border-accent/90 animate-spin-slower"></div>
+      <div className="absolute left-72 top-16 w-14 h-14 bg-accent rotate-45 opacity-15 animate-float"></div>
+
+      <header className="relative z-10 px-14 pt-12" data-stagger>
+        <img src="../screenesia-logo.png" alt="Screenesia" className="absolute top-6 right-8 z-20 h-9 w-auto pointer-events-none" />
+        <div className="text-sm font-extrabold tracking-[2.5px] uppercase text-accent">Motivasi</div>
+        <h1 className="mt-2 text-6xl font-black leading-tight text-ink">Kenapa Belajar Dart?</h1>
+        <div className="mt-4 h-2 w-24 rounded bg-accent"></div>
+      </header>
+
+      <main className="relative z-10 mt-8 flex-1 px-14" data-stagger>
+        <div className="flex items-start gap-3 rounded-xl bg-stone-100 p-5 opacity-90 animate-fade-up">
+          <div className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-stone-400 font-extrabold text-white">✕</div>
+          <p className="text-[19px] leading-relaxed text-stone-400">
+            Bukan hanya: <span className="line-through decoration-accent decoration-[3px]">"Karena Flutter pakai Dart."</span>
+          </p>
+        </div>
+
+        <div className="mt-3 flex justify-center animate-fade-up" style={{ animationDelay: '180ms' }}>
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-2xl font-black text-white shadow-lg">↓</span>
+        </div>
+
+        <div className="rounded-2xl bg-ink p-7 shadow-xl animate-fade-up" style={{ animationDelay: '300ms' }}>
+          <div className="text-sm font-extrabold uppercase tracking-[2.5px] text-accent">Alasan sebenarnya</div>
+          <p className="mt-3 text-[26px] font-black leading-snug text-white">
+            "Dengan mempelajari Dart, kita belajar <span className="text-accent">programming</span> sekaligus siap membuat aplikasi <span className="text-accent">multiplatform</span> yang menjanjikan karier."
+          </p>
+        </div>
+
+        <div className="mt-5 flex items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: '430ms' }}>
+          {evid.map((e, i) => (
+            <span key={i} className="rounded-full border-2 border-accent bg-accent-soft px-5 py-2 text-[15px] font-bold text-ink transition-transform hover:scale-105">
+              {e}
+            </span>
+          ))}
+        </div>
+      </main>
+
+      <footer className="relative z-10 mt-6 flex items-center justify-between border-t border-stone-300 px-14 pb-7 pt-3 text-sm text-accent">
+        <span>#UpgradeYourSkillNow</span>
+        <span>www.screenesia.com</span>
+      </footer>
+
+      <button onClick={() => setNotes(!notes)}
+        className="fixed right-6 bottom-6 z-50 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95">
+        Catatan Pengajar
+      </button>
+      {notes && (
+        <div className="fixed left-6 bottom-6 z-40 w-[460px] rounded-xl border-2 border-accent bg-white p-5 shadow-2xl animate-pop">
+          <h3 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-accent">Catatan Pengajar</h3>
+          <p className="text-[15px] leading-relaxed text-slate-700">Bangun antisipasi: mulai dari alasan yang salah dan coret, lalu baca alasan sebenarnya dengan penekanan. Hubungkan ke Sesi-01 — "Kemarin kita tahu Flutter itu apa, hari ini kita mulai belajar bahasa Dart yang menjadi fondasi Flutter." Tanya: "Siapa yang sudah install Flutter?"</p>
+        </div>
+      )}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Slide />);
+</script>
+<!-- deck-nav forwarder (presenter) -->
+<script>
+(function () {
+  try {
+    if (window.self !== window.top) {
+      window.addEventListener('keydown', function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        var keys = ['ArrowRight', 'ArrowLeft', 'PageDown', 'PageUp', ' ', 'Home', 'End', 'f', 'F'];
+        if (keys.indexOf(e.key) === -1) return;
+        e.preventDefault();
+        window.parent.postMessage({ type: 'deck-nav', key: e.key }, '*');
+      });
+    }
+  } catch (err) {}
+})();
+</script>
+</body>
+</html>

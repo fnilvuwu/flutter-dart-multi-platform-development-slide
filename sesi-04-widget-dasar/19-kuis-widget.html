@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>19 · Kuis Widget</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { accent: '#E32428', 'accent-soft': '#FBE8E8', 'accent-strong': '#C1121F', paper: '#FFFFFF', ink: '#1F1F1F' },
+    animation: { 'fade-up': 'fade-up .8s cubic-bezier(.22,.61,.36,1) both', 'pop': 'pop .5s ease-out both', 'float': 'floaty 6s ease-in-out infinite', 'spin-slower': 'spin-slow 18s linear infinite' }
+  }}
+};
+</script>
+<style>
+@keyframes fade-up { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pop { 0% { transform:scale(.8); opacity:0; } 70% { transform:scale(1.05); } 100% { transform:scale(1); opacity:1; } }
+@keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+@keyframes spin-slow { to { transform:rotate(360deg); } }
+[data-stagger] > * { opacity:0; animation:fade-up .8s ease-out forwards; }
+[data-stagger] > *:nth-child(1){ animation-delay:.10s; }
+[data-stagger] > *:nth-child(2){ animation-delay:.22s; }
+[data-stagger] > *:nth-child(3){ animation-delay:.34s; }
+[data-stagger] > *:nth-child(4){ animation-delay:.46s; }
+</style>
+<script>if (window.self !== window.top) document.documentElement.classList.add('presenter');</script>
+<style>html.presenter body{margin:0!important}html.presenter .relative.mx-auto.my-8{margin:0!important}html.presenter .fixed.right-6{display:none!important}</style>
+</head>
+<body class="bg-[#3A3F44]">
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState } = React;
+
+const questions = [
+  { q: 'Widget apa yang menampilkan teks statis?', options: ['TextField', 'Text', 'Label', 'Paragraph'], correct: 1 },
+  { q: 'Kapan harus pakai StatefulWidget?', options: ['Selalu', 'Saat UI berubah', 'Saat butuh network', 'Saat pakai Container'], correct: 1 },
+  { q: 'Apa fungsi setState()?', options: ['Menghapus widget', 'Membangun ulang UI', 'Menyimpan data', 'Import library'], correct: 1 },
+  { q: 'Widget untuk bungkus dengan warna & padding?', options: ['Box', 'Card', 'Container', 'Wrapper'], correct: 2 },
+];
+
+function Slide() {
+  const [notes, setNotes] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+
+  const handleAnswer = (idx) => {
+    if (selected !== null) return;
+    setSelected(idx);
+    if (idx === questions[current].correct) setScore(score + 1);
+  };
+
+  const next = () => {
+    if (current < questions.length - 1) {
+      setCurrent(current + 1);
+      setSelected(null);
+    } else {
+      setFinished(true);
+    }
+  };
+
+  const reset = () => {
+    setCurrent(0);
+    setSelected(null);
+    setScore(0);
+    setFinished(false);
+  };
+
+  return (
+    <div className="relative mx-auto my-8 w-[1280px] h-[720px] overflow-hidden bg-paper shadow-2xl flex flex-col">
+      <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full border-[22px] border-accent/90 animate-spin-slower"></div>
+      <div className="absolute left-72 top-20 w-14 h-14 bg-accent rotate-45 opacity-15 animate-float"></div>
+      <header className="relative z-10 px-14 pt-12" data-stagger>
+        <img src="../screenesia-logo.png" alt="Screenesia" className="absolute top-6 right-8 z-20 h-9 w-auto pointer-events-none" />
+        <div className="text-sm font-extrabold tracking-[2.5px] uppercase text-accent">KUIS</div>
+        <h1 className="mt-2 text-6xl font-black leading-tight text-ink">Quiz Widget Dasar</h1>
+        <div className="mt-4 h-2 w-24 rounded bg-accent"></div>
+      </header>
+      <main className="relative z-10 mt-6 flex-1 px-14" data-stagger>
+        {!finished ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-slate-400">Soal {current + 1} / {questions.length}</div>
+              <div className="text-sm font-bold text-accent">Skor: {score}</div>
+            </div>
+            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className="h-full bg-accent rounded-full transition-all duration-500" style={{width: `${((current + 1) / questions.length) * 100}%`}}></div>
+            </div>
+            <div className="rounded-2xl bg-accent-soft p-8 border border-accent/20">
+              <h2 className="text-2xl font-bold text-ink mb-6">{questions[current].q}</h2>
+              <div className="grid grid-cols-2 gap-4">
+                {questions[current].options.map((opt, idx) => {
+                  let bg = 'bg-white border-2 border-slate-200 hover:border-accent';
+                  if (selected !== null) {
+                    if (idx === questions[current].correct) bg = 'bg-green-100 border-2 border-green-500';
+                    else if (idx === selected) bg = 'bg-red-100 border-2 border-red-500';
+                    else bg = 'bg-slate-50 border-2 border-slate-200';
+                  }
+                  return (
+                    <button key={idx} onClick={() => handleAnswer(idx)} className={`rounded-xl px-6 py-4 text-left font-medium transition-all ${bg}`}>
+                      <span className="text-slate-400 mr-2">{String.fromCharCode(65 + idx)}.</span> {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {selected !== null && (
+              <div className="flex justify-end animate-pop">
+                <button onClick={next} className="rounded-xl bg-accent px-8 py-3 text-white font-bold shadow-lg transition-transform hover:scale-105 active:scale-95">
+                  {current < questions.length - 1 ? 'Soal Berikutnya →' : 'Lihat Hasil'}
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full animate-pop">
+            <div className="text-8xl mb-6">{score === questions.length ? '🎉' : score >= 2 ? '👍' : '📚'}</div>
+            <div className="text-5xl font-black text-ink">{score} / {questions.length}</div>
+            <div className="mt-4 text-xl text-slate-500">
+              {score === questions.length ? 'Sempurna! Kamu menguasai widget dasar!' : score >= 2 ? 'Bagus! Masih perlu review sedikit.' : 'Perlu belajar lagi ya!'}
+            </div>
+            <button onClick={reset} className="mt-8 rounded-xl bg-accent px-8 py-3 text-white font-bold shadow-lg transition-transform hover:scale-105 active:scale-95">
+              Ulangi Kuis
+            </button>
+          </div>
+        )}
+      </main>
+      <footer className="relative z-10 mt-6 flex items-center justify-between border-t border-stone-300 px-14 pb-7 pt-3 text-sm text-accent">
+        <span>#UpgradeYourSkillNow</span>
+        <span>www.screenesia.com</span>
+      </footer>
+      <button onClick={() => setNotes(!notes)} className="fixed right-6 bottom-6 z-50 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95">Catatan Pengajar</button>
+      {notes && (<div className="fixed left-6 bottom-6 z-40 w-[460px] rounded-xl border-2 border-accent bg-white p-5 shadow-2xl animate-pop"><h3 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-accent">Catatan Pengajar</h3><p className="text-[15px] leading-relaxed text-slate-700">Kuis interaktif untuk review pemahaman. Bisa dimodifikasi soalnya sesuai kebutuhan kelas.</p></div>)}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Slide />);
+</script>
+<!-- deck-nav forwarder (presenter) -->
+<script>
+(function () {
+  try {
+    if (window.self !== window.top) {
+      window.addEventListener('keydown', function (e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        var keys = ['ArrowRight', 'ArrowLeft', 'PageDown', 'PageUp', ' ', 'Home', 'End', 'f', 'F'];
+        if (keys.indexOf(e.key) === -1) return;
+        e.preventDefault();
+        window.parent.postMessage({ type: 'deck-nav', key: e.key }, '*');
+      });
+    }
+  } catch (err) {}
+})();
+</script>
+</body>
+</html>
