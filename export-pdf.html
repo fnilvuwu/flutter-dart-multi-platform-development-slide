@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Export — Flutter Multiplatform</title>
+<style>
+  :root { --accent:#E32428; --accent-strong:#C1121F; --bg:#3A3F44; --panel:#2B2F33; --ink:#ECECEC; --muted:#9AA0A6; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:40px 20px; }
+  h1 { font-size:28px; font-weight:900; color:#fff; margin-bottom:8px; }
+  h1 span { color:var(--accent); }
+  .subtitle { color:var(--muted); font-size:14px; margin-bottom:32px; }
+  .card { background:var(--panel); border-radius:16px; padding:32px; width:100%; max-width:520px; box-shadow:0 8px 32px rgba(0,0,0,.4); }
+  label { display:block; font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  select { width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:#1E2124; color:var(--ink); font-size:15px; font-family:inherit; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239AA0A6'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; }
+  select:focus { outline:none; border-color:var(--accent); }
+  .btn { display:block; width:100%; margin-top:20px; padding:14px; border:none; border-radius:10px; background:var(--accent); color:#fff; font-size:16px; font-weight:800; cursor:pointer; transition:background .15s,transform .1s; }
+  .btn:hover { background:var(--accent-strong); transform:translateY(-1px); }
+  .btn:active { transform:scale(.98); }
+  .btn.secondary { background:var(--panel); border:2px solid rgba(255,255,255,.15); }
+  .btn.secondary:hover { border-color:var(--accent); }
+  .info { margin-top:20px; padding:14px; border-radius:10px; background:rgba(227,36,40,.08); border:1px solid rgba(227,36,40,.2); font-size:13px; color:var(--muted); line-height:1.6; }
+  .info b { color:var(--ink); }
+
+  #slideArea { width:1280px; margin:20px auto 0 auto; }
+  #slideArea iframe {
+    width:1280px; height:720px; border:none; display:block;
+    margin:0 auto 4px auto; background:#fff;
+  }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    body { background:#fff !important; padding:0 !important; margin:0 !important; }
+    .no-print { display:none !important; }
+    #slideArea { width:1280px; margin:0; }
+    #slideArea iframe {
+      width:1280px !important; height:720px !important;
+      page-break-after:always; page-break-inside:avoid;
+      margin:0 !important; border:none !important;
+      -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    }
+    #slideArea iframe:last-child { page-break-after:auto; }
+  }
+</style>
+</head>
+<body>
+
+<h1 class="no-print"><span>PDF</span> Exporter</h1>
+<p class="subtitle no-print">Scroll ke bawah untuk memuat semua animasi, lalu Print</p>
+
+<div class="card no-print">
+  <label for="sessionSelect">Pilih Sesi</label>
+  <select id="sessionSelect"></select>
+
+  <div style="display:flex;gap:10px;margin-top:20px;">
+    <button class="btn secondary" id="loadBtn" onclick="loadSlides()" style="flex:1;">📥 Load Slides</button>
+    <button class="btn" onclick="window.print()" style="flex:1;">🖨 Print / Save as PDF</button>
+  </div>
+
+  <div class="info">
+    <b>Cara pakai:</b><br>
+    1. Pilih sesi → klik <b>Load Slides</b><br>
+    2. <b>Scroll ke bawah</b> sampai slide terakhir (biar animasi render)<br>
+    3. Scroll balik ke atas → klik <b>Print / Save as PDF</b><br>
+    4. Pilih "Save as PDF" → paper: <b>1280×720</b> atau <b>Custom</b>
+  </div>
+</div>
+
+<div id="slideArea"></div>
+
+<script>
+(function() {
+  var SESSIONS = [
+    { title: 'Sesi 1 — Pengenalan Flutter', dir: 'sesi-01-pengenalan-flutter', files: [
+      '01-cover-pengenalan-flutter.html','02-perkenalan-pemateri.html','03-kenapa-flutter-career.html',
+      '04-analogi-flutter.html','05-apa-itu-flutter.html','06-kenapa-flutter.html',
+      '07-persiapan-development-environment.html','08-download-install-vscode.html',
+      '09-mengenal-vscode-terminal.html','10-install-flutter-extension.html',
+      '11-cek-flutter-di-vscode.html','12-download-install-visual-studio.html',
+      '13-workload-windows-sdk.html','14-download-install-android-studio.html',
+      '15-android-sdk-konfigurasi.html','16-membuat-android-emulator.html',
+      '17-menjalankan-emulator.html','18-install-google-chrome.html',
+      '19-download-flutter-sdk.html','20-flutter-ke-path.html',
+      '21-verifikasi-flutter.html','22-flutter-doctor.html',
+      '23-konfigurasi-platform.html','24-setup-macos-flutter.html',
+      '25-setup-macos-xcode.html',
+      '26-live-code-hello-flutter.html','27-practice-hello-flutter.html',
+      '28-flutter-vs-native.html','29-what-if-tanpa-crossplatform.html',
+      '30-live-code-perbandingan-syntax.html',
+      '31-kuis-interaktif.html','32-analogi-widget-tree.html',
+      '33-ringkasan-sesi1.html','34-tugas-pr.html','35-penutup-sesi1.html'
+    ] },
+    { title: 'Sesi 2 — Dart Basics', dir: 'sesi-02-dart-basics', files: [
+      '01-cover-dart-basics.html','03-kenapa-dart-flutter-career.html',
+      '04-arsitektur-flutter.html','05-live-code-widget-pertama.html',
+      '06-practice-build-widget.html','07-what-if-widget-sama.html',
+      '08-definisi-variabel.html','09-live-code-variabel.html',
+      '10-practice-variabel.html','11-misi-tukar-nilai.html',
+      '12-analogi-variabel.html','13-what-if-tanpa-tipe.html',
+      '14-analogi-string-interpolation.html','15-live-code-string.html',
+      '16-practice-string-2.html','17-practice-string.html',
+      '18-what-if-salah-tulis.html','19-konsep-operator.html',
+      '20-live-code-operator.html','21-practice-operator.html',
+      '22-what-if-urutan-operasi.html','23-konsep-operator-logika.html',
+      '24-live-code-logika.html','25-practice-logika.html',
+      '26-what-if-equals.html','27-kuis-dart.html','28-ringkasan-sesi2.html'
+    ] },
+    { title: 'Sesi 3 — Control Flow', dir: 'sesi-03-control-flow', files: [
+      '01-cover-control-flow.html','02-analogi-if-else.html','03-definisi-conditional.html',
+      '04-live-code-conditional.html','05-practice-conditional.html','06-what-if-tanpa-else.html',
+      '07-konsep-switch.html','08-live-code-switch.html','09-practice-switch.html',
+      '10-what-if-switch-break.html','11-analogi-loop.html','12-konsep-loop.html',
+      '13-live-code-loop.html','14-practice-loop.html','15-what-if-infinite-loop.html',
+      '16-analogi-function.html','17-definisi-function.html','18-live-code-function.html',
+      '19-practice-function.html','20-what-if-tanpa-return.html','21-kuis-control-flow.html',
+      '22-ringkasan-sesi3.html'
+    ] },
+    { title: 'Sesi 4 — Widget Dasar', dir: 'sesi-04-widget-dasar', files: [
+      '01-cover-widget-dasar.html','02-analogi-widget.html','03-definisi-widget.html',
+      '04-live-code-text.html','05-practice-text.html','06-what-if-widget-kosong.html',
+      '07-konsep-stateless-stateful.html','08-live-code-stateful.html','09-practice-like-button.html',
+      '10-what-if-tanpa-setstate.html','11-konsep-container.html','12-live-code-container.html',
+      '13-practice-card.html','14-what-if-container-kosong.html',
+      '15-konsep-icon-image.html','16-live-code-icon.html',
+      '17-practice-profile.html','18-what-if-image-salah.html',
+      '19-kuis-widget.html','20-ringkasan-sesi4.html'
+    ] },
+    { title: 'Sesi 5 — Layout', dir: 'sesi-05-layout', files: [
+      '01-cover-layout.html','02-mengapa-layout-penting.html','03-row-column.html',
+      '04-mainaxis-crossaxis.html','05-flex-expanded.html','06-what-if-tanpa-expanded.html',
+      '07-stack-positioned.html','08-gridview.html','09-listview.html',
+      '10-singlechildscrollview.html','11-sizedbox-container.html','12-mediasquery-responsivitas.html',
+      '13-wrap-spacer.html','14-aspectratio-flexible.html','15-praktik-layout-aplikasi.html',
+      '16-latihan-layout.html','17-kuis-layout.html','18-ringkasan-sesi5.html'
+    ] },
+    { title: 'Sesi 6 — State Management', dir: 'sesi-06-state-management', files: [
+      '01-cover-state.html','02-apa-itu-state.html','03-setstate.html',
+      '04-widget-lifecycle-1.html','04-widget-lifecycle-2.html','05-what-if-tanpa-setstate.html','06-stateful-vs-stateless.html',
+      '07-provider-pattern.html','08-changenotifier.html','09-provider-setup-1.html','09-provider-setup-2.html',
+      '10-watch-vs-read.html','11-praktik-counter-provider-1.html','11-praktik-counter-provider-2.html','12-multi-provider.html',
+      '13-provider-vs-setstate.html','14-latihan-todo-list.html','15-kuis-state-management.html',
+      '16-error-handling.html','17-best-practices.html','18-ringkasan-sesi6.html'
+    ] },
+    { title: 'Sesi 7 — Navigasi', dir: 'sesi-07-navigasi', files: [
+      '01-cover-navigasi.html','02-mengapa-navigasi.html','03-navigator-push.html',
+      '04-navigator-pop.html','05-what-if-tanpa-pop.html','06-named-routes.html',
+      '07-passing-data-1.html','07-passing-data-2.html','08-return-data.html','09-route-not-found.html',
+      '10-push-replacement.html','11-bottom-navigation.html','12-drawer-navigation-1.html','12-drawer-navigation-2.html',
+      '13-praktik-multi-halaman.html','14-latihan-aplikasi-login-1.html','14-latihan-aplikasi-login-2.html','15-kuis-navigasi.html',
+      '16-perbandingan-navigasi.html','17-best-practices-navigasi.html','18-ringkasan-sesi7.html'
+    ] },
+    { title: 'Sesi 8 — Input & Form', dir: 'sesi-08-input-form', files: [
+      '01-cover-input.html','02-daftar-isi.html','03-textformfield-dasar.html',
+      '04-textformfield-properti.html','05-decorations.html','06-controller.html',
+      '07-form-validation.html','08-validator-fungsi.html','09-form-class-1.html','09-form-class-2.html','09-form-class-2b.html',
+      '10-elevated-button.html','11-text-button-outlined.html','12-checkbox.html',
+      '13-radio-button.html','14-switch.html','15-analogi-formulir.html',
+      '16-what-if.html','17-quiz.html','18-ringkasan-sesi8.html'
+    ] },
+    { title: 'Sesi 9 — Data Storage', dir: 'sesi-09-data-storage', files: [
+      '01-cover-storage.html','02-daftar-isi.html','03-overview-storage.html',
+      '04-shared-preferences-dasar.html','05-shared-preferences-crud.html','06-json-parsing.html',
+      '07-json-model-1.html','07-json-model-2.html','07-json-model-2b.html',
+      '08-sqlite-intro.html','09-sqlite-database-1.html','09-sqlite-database-2.html','09-sqlite-database-2b.html',
+      '10-sqlite-crud-1.html','10-sqlite-crud-2.html','10-sqlite-crud-2b.html',
+      '11-file-storage.html','12-path-provider.html',
+      '13-analogi-gudang.html','14-what-if.html','15-perbandingan.html',
+      '16-quiz.html','17-praktikum-1.html','17-praktikum-2.html','17-praktikum-2b.html','18-ringkasan-sesi9.html'
+    ] },
+    { title: 'Sesi 10 — Networking & Proyek', dir: 'sesi-10-networking-proyek', files: [
+      '01-cover-networking.html','02-daftar-isi.html','03-http-dasar.html',
+      '04-http-request-1.html','04-http-request-2.html','04-http-request-2b.html',
+      '05-json-parsing-1.html','05-json-parsing-2.html',
+      '06-api-integration.html','07-image-loading-1.html','07-image-loading-2.html',
+      '08-error-handling-1.html','08-error-handling-2.html','08-error-handling-2b.html',
+      '09-loading-states-1.html','09-loading-states-2.html','09-loading-states-2b.html',
+      '10-api-integration-1.html','10-api-integration-2.html','10-api-integration-2b.html',
+      '11-analogi-restoran.html','12-what-if.html',
+      '13-mini-project-intro.html','14-weather-api-1.html','14-weather-api-2.html','15-weather-model-1.html','15-weather-model-2.html',
+      '16-weather-service-1.html','16-weather-service-2.html','16-weather-service-2b.html',
+      '17-weather-ui-1.html','17-weather-ui-2.html','17-weather-ui-3.html',
+      '18-build-deploy.html','19-quiz.html','20-ringkasan-kursus.html'
+    ] }
+  ];
+
+  var select = document.getElementById('sessionSelect');
+  var optAll = document.createElement('option');
+  optAll.value = 'all';
+  optAll.textContent = 'Semua Sesi (1–10)';
+  select.appendChild(optAll);
+  SESSIONS.forEach(function(ses, i) {
+    var opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = ses.title;
+    select.appendChild(opt);
+  });
+
+  var params = new URLSearchParams(window.location.search);
+  var sessionParam = params.get('session');
+  if (sessionParam === 'all') {
+    select.value = 'all';
+  } else if (sessionParam && !isNaN(+sessionParam)) {
+    var idx = +sessionParam - 1;
+    if (idx >= 0 && idx < SESSIONS.length) select.value = idx;
+  }
+
+  window.loadSlides = function() {
+    var selVal = select.value;
+    var files = [];
+    if (selVal === 'all') {
+      SESSIONS.forEach(function(ses) {
+        ses.files.forEach(function(f) { files.push(ses.dir + '/' + f); });
+      });
+    } else {
+      var ses = SESSIONS[+selVal];
+      ses.files.forEach(function(f) { files.push(ses.dir + '/' + f); });
+    }
+
+    var slideArea = document.getElementById('slideArea');
+    slideArea.innerHTML = '';
+
+    files.forEach(function(url) {
+      var iframe = document.createElement('iframe');
+      iframe.style.cssText = 'width:1280px;height:720px;border:none;display:block;margin:0 auto 4px auto;background:#fff;';
+      iframe.src = url;
+      slideArea.appendChild(iframe);
+    });
+  };
+
+  if (sessionParam) {
+    setTimeout(function() { window.loadSlides(); }, 100);
+  }
+})();
+</script>
+</body>
+</html>

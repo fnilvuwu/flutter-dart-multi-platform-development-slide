@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flutter &amp; Dart — Slide Presenter</title>
+<meta name="description" content="Bahan ajar interaktif Flutter Multiplatform Development — 10 sesi, 285+ slide, live code, latihan, dan kuis. Screenesia.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Flutter & Dart — Slide Presenter">
+<meta property="og:description" content="Bahan ajar interaktif Flutter Multiplatform Development — 10 sesi, 285+ slide, live code, latihan, dan kuis. Screenesia.">
+<meta property="og:image" content="screenesia-og.png">
+<meta property="og:url" content="">
+<meta property="og:site_name" content="Screenesia">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Flutter & Dart — Slide Presenter">
+<meta name="twitter:description" content="Bahan ajar interaktif Flutter Multiplatform Development — 10 sesi, 285+ slide.">
+<meta name="twitter:image" content="screenesia-og.png">
+<link rel="icon" href="screenesia-logo.png" type="image/png">
 <style>
   :root { --accent:#E32428; --accent-strong:#C1121F; --bg:#3A3F44; --panel:#2B2F33; --ink:#ECECEC; --muted:#9AA0A6; }
   * { box-sizing: border-box; }
@@ -602,12 +614,22 @@
   });
 
   function printSlide() {
-    if (activeFrame && activeFrame.contentWindow) {
-      try {
-        activeFrame.contentWindow.focus();
-        activeFrame.contentWindow.print();
-      } catch (e) {
-        toastMsg('Tidak bisa print slide ini');
+    if (activeFrame && activeFrame.dataset && activeFrame.dataset.key) {
+      var url = activeFrame.dataset.key;
+      var win = window.open(url, '_blank');
+      if (win) {
+        win.addEventListener('load', function() {
+          setTimeout(function() {
+            try {
+              var style = win.document.createElement('style');
+              style.textContent = '@media print{ @page{size:1280px 720px;margin:0} body{margin:0!important;padding:0!important} .fixed{display:none!important} .relative.mx-auto.my-8{margin:0!important} .relative.mx-auto.my-8.w-\\[1280px\\]{margin:0!important} }';
+              win.document.head.appendChild(style);
+              win.print();
+            } catch (e) {}
+          }, 3000);
+        });
+      } else {
+        toastMsg('Popup diblokir browser. Izinkan popup untuk print.');
       }
     } else {
       toastMsg('Belum ada slide yang tampil');
@@ -636,9 +658,9 @@
       if (action === 'current') {
         printSlide();
       } else if (action === 'session') {
-        exportSessionPDF(currentSessionIdx);
+        window.open('export-pdf.html?session=' + (currentSessionIdx + 1), '_blank');
       } else if (action === 'all') {
-        exportAllPDF();
+        window.open('export-pdf.html?session=all', '_blank');
       }
     });
   });

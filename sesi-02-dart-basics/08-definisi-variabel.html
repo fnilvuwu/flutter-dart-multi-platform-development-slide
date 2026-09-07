@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>05 Â· definisi variabel</title>
 <script>if (window.self !== window.top) document.documentElement.classList.add('presenter');</script>
-<style>html.presenter body{margin:0!important}html.presenter .relative.mx-auto.my-8{margin:0!important}html.presenter .fixed.right-6{display:none!important}</style>
+<style>html.presenter body{margin:0!important}html.presenter .relative.mx-auto.my-8{margin:0!important}html.presenter .fixed.right-6{display:none!important}@media print {
+  @page { size: 1280px 720px; margin: 0; }
+  body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+  .fixed { display: none !important; }
+  .relative.mx-auto.my-8 { margin: 0 !important; }
+}
+</style>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
@@ -25,6 +31,12 @@ tailwind.config = {
 [data-stagger] > *:nth-child(2){ animation-delay:.22s; }
 [data-stagger] > *:nth-child(3){ animation-delay:.34s; }
 [data-stagger] > *:nth-child(4){ animation-delay:.46s; }
+@media print {
+  @page { size: 1280px 720px; margin: 0; }
+  body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+  .fixed { display: none !important; }
+  .relative.mx-auto.my-8 { margin: 0 !important; }
+}
 </style>
 </head>
 <body class="bg-[#3A3F44]">
