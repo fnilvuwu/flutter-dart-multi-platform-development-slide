@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>if (window.self !== window.top) document.documentElement.classList.add('presenter');</script>
+<style>html.presenter body{margin:0!important}html.presenter .relative.mx-auto.my-8{margin:0!important}html.presenter .fixed.right-6{display:none!important}</style>
+<title>14 · Download & Install Android Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { accent: '#E32428', 'accent-soft': '#FBE8E8', 'accent-strong': '#C1121F', paper: '#FFFFFF', ink: '#1F1F1F' },
+    animation: { 'fade-up': 'fade-up .8s cubic-bezier(.22,.61,.36,1) both', 'pop': 'pop .5s ease-out both', 'float': 'floaty 6s ease-in-out infinite', 'spin-slower': 'spin-slow 18s linear infinite' }
+  }}
+};
+</script>
+<style>
+@keyframes fade-up { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pop { 0% { transform:scale(.8); opacity:0; } 70% { transform:scale(1.05); } 100% { transform:scale(1); opacity:1; } }
+@keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+@keyframes spin-slow { to { transform:rotate(360deg); } }
+[data-stagger] > * { opacity:0; animation:fade-up .8s ease-out forwards; }
+[data-stagger] > *:nth-child(1){ animation-delay:.10s; }
+[data-stagger] > *:nth-child(2){ animation-delay:.22s; }
+[data-stagger] > *:nth-child(3){ animation-delay:.34s; }
+[data-stagger] > *:nth-child(4){ animation-delay:.46s; }
+</style>
+</head>
+<body class="bg-[#3A3F44]">
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState } = React;
+function Slide() {
+  const [notes, setNotes] = useState(false);
+  const steps = [
+    { num: '1', title: 'Buka developer.android.com/studio', desc: 'Download Android Studio untuk OS Anda' },
+    { num: '2', title: 'Jalankan installer', desc: 'Ikuti wizard instalasi dengan pengaturan default' },
+    { num: '3', title: 'Pilih Standard setup', desc: 'Gunakan pengaturan Standard saat pertama kali membuka' },
+    { num: '4', title: 'Tunggu download', desc: 'Android SDK dan tools akan didownload otomatis' }
+  ];
+  return (
+    <div className="relative mx-auto my-8 w-[1280px] h-[720px] overflow-hidden bg-paper shadow-2xl flex flex-col">
+      <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full border-[22px] border-accent/90 animate-spin-slower"></div>
+      <div className="absolute left-72 top-16 w-14 h-14 bg-accent rotate-45 opacity-15 animate-float"></div>
+      <header className="relative z-10 px-14 pt-12" data-stagger>
+        <img src="../screenesia-logo.png" alt="Screenesia" className="absolute top-6 right-8 z-20 h-9 w-auto pointer-events-none" />
+        <div className="text-sm font-extrabold tracking-[2.5px] uppercase text-accent">Instalasi</div>
+        <h1 className="mt-2 text-5xl font-black leading-tight text-ink">Download & Install Android Studio</h1>
+        <div className="mt-4 h-2 w-24 rounded bg-accent"></div>
+      </header>
+      <main className="relative z-10 mt-6 flex-1 px-14" data-stagger>
+        <div className="grid grid-cols-2 gap-5">
+          <div className="space-y-3">
+            {steps.map((s, i) => (
+              <div key={i} className="flex items-start gap-4 rounded-xl border-2 border-accent bg-white p-4 shadow-sm transition-transform duration-300 hover:-translate-y-0.5 animate-fade-up" style={{ animationDelay: (i * 120) + 'ms' }}>
+                <div className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-accent text-base font-black text-white">{s.num}</div>
+                <div>
+                  <div className="text-[16px] font-bold text-ink">{s.title}</div>
+                  <div className="text-[14px] text-slate-600">{s.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-4">
+            <div className="rounded-xl bg-accent-soft p-5 animate-fade-up" style={{ animationDelay: '300ms' }}>
+              <div className="text-[16px] font-bold text-accent mb-3">Mengapa Android Studio?</div>
+              <div className="space-y-2 text-[14px] text-slate-700">
+                <div className="flex items-start gap-2"><span className="text-accent font-bold">•</span> Menyediakan <b className="font-bold text-ink">Android SDK</b> yang dibutuhkan Flutter</div>
+                <div className="flex items-start gap-2"><span className="text-accent font-bold">•</span> Memiliki <b className="font-bold text-ink">Android Emulator</b> untuk testing</div>
+                <div className="flex items-start gap-2"><span className="text-accent font-bold">•</span> Mengelola <b className="font-bold text-ink">SDK versions</b> dan tools</div>
+                <div className="flex items-start gap-2"><span className="text-accent font-bold">•</span> Diperlukan untuk build aplikasi Android</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 rounded-xl bg-emerald-50 p-4 animate-fade-up" style={{ animationDelay: '460ms' }}>
+              <div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-emerald-600 text-white text-sm font-bold">✓</div>
+              <p className="text-[14px] text-slate-700">Gunakan pengaturan <b className="font-bold text-ink">Standard</b> agar semua komponen penting terinstall otomatis.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer className="relative z-10 mt-6 flex items-center justify-between border-t border-stone-300 px-14 pb-7 pt-3 text-sm text-accent">
+        <span>#UpgradeYourSkillNow</span>
+        <span>www.screenesia.com</span>
+      </footer>
+      <button onClick={() => setNotes(!notes)} className="fixed right-6 bottom-6 z-50 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95">Catatan Pengajar</button>
+      {notes && (<div className="fixed left-6 bottom-6 z-40 w-[460px] rounded-xl border-2 border-accent bg-white p-5 shadow-2xl animate-pop"><h3 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-accent">Catatan Pengajar</h3><p className="text-[15px] leading-relaxed text-slate-700">Android Studio dibutuhkan untuk Android SDK dan emulator. Jelaskan bahwa setup standard sudah cukup untuk pemula. Proses download mungkin memakan waktu.</p></div>)}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Slide />);
+</script>
+<script>(function(){try{if(window.self!==window.top){window.addEventListener('keydown',function(e){if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;var keys=['ArrowRight','ArrowLeft','PageDown','PageUp',' ','Home','End','f','F'];if(keys.indexOf(e.key)===-1)return;e.preventDefault();window.parent.postMessage({type:'deck-nav',key:e.key},'*');});}}catch(err){}})();</script>
+</body>
+</html>

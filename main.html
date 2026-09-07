@@ -151,7 +151,15 @@
     <div class="dropdown-menu" id="dropdownMenu"></div>
   </div>
   <div class="spacer"></div>
-  <button class="btn" id="pdfBtn" title="Print slide yang sedang tampil" onclick="printSlide()">🖨 Print</button>
+  <div class="dropdown" id="pdfDropdown">
+    <button class="btn" id="pdfBtn" title="Export PDF">📄 Export PDF ▾</button>
+    <div class="dropdown-menu" id="pdfMenu">
+      <div class="dropdown-item" data-action="current">📄 Export Slide Ini</div>
+      <div class="dropdown-item" data-action="session">📚 Export Semua Sesi Ini</div>
+      <div class="dropdown-sep"></div>
+      <div class="dropdown-item" data-action="all">📖 Export Semua Sesi (1-10)</div>
+    </div>
+  </div>
   <button class="btn" id="fullscreenBtn" title="Layar penuh (F)">⛶ Fullscreen</button>
   <button class="btn" id="prevBtn" title="Sebelumnya (←)">◀ Prev</button>
   <div class="dropdown" id="gotoDropdown">
@@ -183,21 +191,36 @@
     { title: 'Sesi 1 — Pengenalan Flutter', dir: 'sesi-01-pengenalan-flutter', files: [
       '01-cover-pengenalan-flutter.html', '02-perkenalan-pemateri.html', '03-kenapa-flutter-career.html',
       '04-analogi-flutter.html', '05-apa-itu-flutter.html', '06-kenapa-flutter.html',
-      '07-live-code-hello-flutter.html', '08-practice-hello-flutter.html', '09-flutter-vs-native.html',
-      '10-what-if-tanpa-crossplatform.html', '11-live-code-perbandingan-syntax.html', '12-arsitektur-flutter.html',
-      '13-live-code-widget-pertama.html', '14-practice-build-widget.html', '15-what-if-widget-sama.html',
-      '16-kuis-interaktif.html', '17-analogi-widget-tree.html', '18-ringkasan-sesi1.html',
-      '19-tugas-pr.html', '20-penutup-sesi1.html'
+      '07-persiapan-development-environment.html', '08-download-install-vscode.html',
+      '09-mengenal-vscode-terminal.html', '10-install-flutter-extension.html',
+      '11-cek-flutter-di-vscode.html', '12-download-install-visual-studio.html',
+      '13-workload-windows-sdk.html', '14-download-install-android-studio.html',
+      '15-android-sdk-konfigurasi.html', '16-membuat-android-emulator.html',
+      '17-menjalankan-emulator.html', '18-install-google-chrome.html',
+      '19-download-flutter-sdk.html', '20-flutter-ke-path.html',
+      '21-verifikasi-flutter.html', '22-flutter-doctor.html',
+      '23-konfigurasi-platform.html', '24-setup-macos-flutter.html',
+      '25-setup-macos-xcode.html',
+      '26-live-code-hello-flutter.html', '27-practice-hello-flutter.html',
+      '28-flutter-vs-native.html', '29-what-if-tanpa-crossplatform.html',
+      '30-live-code-perbandingan-syntax.html',
+      '31-kuis-interaktif.html', '32-analogi-widget-tree.html',
+      '33-ringkasan-sesi1.html', '34-tugas-pr.html', '35-penutup-sesi1.html'
     ] },
     { title: 'Sesi 2 — Dart Basics', dir: 'sesi-02-dart-basics', files: [
-      '01-cover-dart-basics.html', '02-perkenalan-pemateri-ringkas.html', '03-kenapa-dart-flutter-career.html',
-      '04-definisi-variabel.html', '05-live-code-variabel.html', '06-practice-variabel.html',
-      '07-misi-tukar-nilai.html', '08-analogi-variabel.html', '09-what-if-tanpa-tipe.html',
-      '10-analogi-string-interpolation.html', '11-live-code-string.html', '12-practice-string.html',
-      '11b-practice-string-2.html', '13-what-if-salah-tulis.html', '14-konsep-operator.html',
-      '15-live-code-operator.html', '16-practice-operator.html', '17-what-if-urutan-operasi.html',
-      '18-konsep-operator-logika.html', '19-live-code-logika.html', '20-practice-logika.html',
-      '21-what-if-equals.html', '22-kuis-dart.html', '23-ringkasan-sesi2.html'
+      '01-cover-dart-basics.html', '03-kenapa-dart-flutter-career.html',
+      '04-arsitektur-flutter.html', '05-live-code-widget-pertama.html',
+      '06-practice-build-widget.html', '07-what-if-widget-sama.html',
+      '08-definisi-variabel.html', '09-live-code-variabel.html',
+      '10-practice-variabel.html', '11-misi-tukar-nilai.html',
+      '12-analogi-variabel.html', '13-what-if-tanpa-tipe.html',
+      '14-analogi-string-interpolation.html', '15-live-code-string.html',
+      '16-practice-string-2.html', '17-practice-string.html',
+      '18-what-if-salah-tulis.html', '19-konsep-operator.html',
+      '20-live-code-operator.html', '21-practice-operator.html',
+      '22-what-if-urutan-operasi.html', '23-konsep-operator-logika.html',
+      '24-live-code-logika.html', '25-practice-logika.html',
+      '26-what-if-equals.html', '27-kuis-dart.html', '28-ringkasan-sesi2.html'
     ] },
     { title: 'Sesi 3 — Control Flow', dir: 'sesi-03-control-flow', files: [
       '01-cover-control-flow.html', '02-analogi-if-else.html', '03-definisi-conditional.html',
@@ -337,6 +360,7 @@
   document.addEventListener('click', (e) => {
     if (!dropdownWrap.contains(e.target)) closeDropdown();
     if (!gotoWrap.contains(e.target)) closeGoto();
+    if (!pdfDropdown.contains(e.target)) closePdfMenu();
   });
 
   function buildGotoSessions() {
@@ -588,6 +612,104 @@
     } else {
       toastMsg('Belum ada slide yang tampil');
     }
+  }
+
+  // PDF Export functions
+  var pdfDropdown = document.getElementById('pdfDropdown');
+  var pdfBtn = document.getElementById('pdfBtn');
+  var pdfMenu = document.getElementById('pdfMenu');
+
+  function togglePdfMenu() {
+    pdfMenu.classList.toggle('open');
+  }
+
+  function closePdfMenu() {
+    pdfMenu.classList.remove('open');
+  }
+
+  pdfBtn.addEventListener('click', function(e) { e.stopPropagation(); togglePdfMenu(); });
+
+  pdfMenu.querySelectorAll('.dropdown-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var action = item.dataset.action;
+      closePdfMenu();
+      if (action === 'current') {
+        printSlide();
+      } else if (action === 'session') {
+        exportSessionPDF(currentSessionIdx);
+      } else if (action === 'all') {
+        exportAllPDF();
+      }
+    });
+  });
+
+  function exportSessionPDF(sessionIdx) {
+    var ses = SESSIONS[sessionIdx];
+    toastMsg('Membuka export PDF: ' + ses.title);
+    var win = window.open('', '_blank');
+    var html = '<!DOCTYPE html><html><head><title>' + ses.title + ' — PDF Export</title>';
+    html += '<style>@page{size:landscape;margin:0}body{margin:0;padding:0;background:#fff}';
+    html += '.slide-frame{width:1280px;height:720px;border:none;display:block;page-break-after:always;margin:0 auto}';
+    html += '.slide-frame:last-child{page-break-after:auto}';
+    html += '.controls{position:fixed;top:10px;right:10px;z-index:9999;background:#E32428;color:#fff;padding:12px 20px;border-radius:8px;font-family:Segoe UI,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.3)}';
+    html += '.controls button{background:#fff;color:#E32428;border:none;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;margin-left:10px;font-size:13px}';
+    html += '.controls button:hover{background:#f0f0f0}';
+    html += '.loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Segoe UI,sans-serif;font-size:18px;color:#666;z-index:9998}</style></head><body>';
+    html += '<div class="controls" id="controls"><span id="status">Memuat slide...</span><button onclick="window.print()">📄 Print / Save as PDF</button></div>';
+    html += '<div class="loading" id="loading">Memuat ' + ses.files.length + ' slide...</div>';
+
+    ses.files.forEach(function(f, i) {
+      html += '<iframe class="slide-frame" id="slide-' + i + '" data-src="' + ses.dir + '/' + f + '"></iframe>';
+    });
+
+    html += '<script>';
+    html += 'var total=' + ses.files.length + ',loaded=0;';
+    html += 'function checkLoaded(){loaded++;document.getElementById("loading").textContent="Memuat slide "+loaded+"/"+total+"...";if(loaded>=total){document.getElementById("loading").style.display="none";document.getElementById("status").textContent="' + ses.title + ' — "+total+" slide siap. Klik Print untuk save PDF.";}}';
+    html += 'window.onload=function(){for(var i=0;i<total;i++){(function(idx){var iframe=document.getElementById("slide-"+idx);iframe.onload=function(){setTimeout(function(){checkLoaded();},800);};iframe.src=iframe.dataset.src;})(i);}};';
+    html += '</' + 'script>';
+    html += '</body></html>';
+
+    win.document.write(html);
+    win.document.close();
+  }
+
+  function exportAllPDF() {
+    toastMsg('Membuka export semua sesi...');
+    var win = window.open('', '_blank');
+    var html = '<!DOCTYPE html><html><head><title>Flutter Multiplatform — Export Semua Sesi</title>';
+    html += '<style>@page{size:landscape;margin:0}body{margin:0;padding:0;background:#fff}';
+    html += '.slide-frame{width:1280px;height:720px;border:none;display:block;page-break-after:always;margin:0 auto}';
+    html += '.slide-frame:last-child{page-break-after:auto}';
+    html += '.session-header{width:1280px;height:120px;margin:0 auto;display:flex;align-items:center;justify-content:center;background:#E32428;color:#fff;font-family:Segoe UI,sans-serif;font-size:28px;font-weight:900;page-break-after:always}';
+    html += '.controls{position:fixed;top:10px;right:10px;z-index:9999;background:#E32428;color:#fff;padding:12px 20px;border-radius:8px;font-family:Segoe UI,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.3)}';
+    html += '.controls button{background:#fff;color:#E32428;border:none;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;margin-left:10px;font-size:13px}';
+    html += '.loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Segoe UI,sans-serif;font-size:18px;color:#666;z-index:9998}</style></head><body>';
+    html += '<div class="controls" id="controls"><span id="status">Memuat semua sesi...</span><button onclick="window.print()">📄 Print / Save as PDF</button></div>';
+
+    var allSlides = [];
+    SESSIONS.forEach(function(ses, si) {
+      html += '<div class="session-header">' + ses.title + '</div>';
+      ses.files.forEach(function(f, fi) {
+        var id = 's' + si + '-' + fi;
+        html += '<iframe class="slide-frame" id="' + id + '" data-src="' + ses.dir + '/' + f + '"></iframe>';
+        allSlides.push(id);
+      });
+    });
+
+    html += '<div class="loading" id="loading">Memuat ' + allSlides.length + ' slide dari ' + SESSIONS.length + ' sesi...</div>';
+    html += '<script>';
+    html += 'var total=' + allSlides.length + ',loaded=0;';
+    html += 'function checkLoaded(){loaded++;document.getElementById("loading").textContent="Memuat slide "+loaded+"/"+total+"...";if(loaded>=total){document.getElementById("loading").style.display="none";document.getElementById("status").textContent="Semua slide siap — "+total+" slide. Klik Print untuk save PDF.";}}';
+    html += 'window.onload=function(){';
+    allSlides.forEach(function(id, i) {
+      html += '(function(){var f=document.getElementById("' + id + '");f.onload=function(){setTimeout(function(){checkLoaded();},800);};f.src=f.dataset.src;})();';
+    });
+    html += '};';
+    html += '</' + 'script>';
+    html += '</body></html>';
+
+    win.document.write(html);
+    win.document.close();
   }
 
   window.addEventListener('resize', fit);
