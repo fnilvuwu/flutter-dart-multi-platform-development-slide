@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -53,15 +53,16 @@ function Slide() {
       <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full border-[22px] border-accent/90 animate-spin-slower"></div>
       <div className="absolute left-72 top-20 w-14 h-14 bg-accent rotate-45 opacity-15 animate-float"></div>
       <header className="relative z-10 px-14 pt-8" data-stagger>
-        <img src="../screenesia-logo.png" alt="Screenesia" className="absolute top-6 right-8 z-20 h-9 w-auto pointer-events-none" />
+        <img src="../assets/screenesia-logo.png" alt="Screenesia" className="absolute top-6 right-8 z-20 h-9 w-auto pointer-events-none" />
         <div className="text-sm font-extrabold tracking-[2.5px] uppercase text-accent">Data (1/2)</div>
         <h1 className="mt-2 text-4xl font-black leading-tight text-ink">Passing Data — Constructor</h1>
         <div className="mt-3 h-2 w-24 rounded bg-accent"></div>
       </header>
       <main className="relative z-10 mt-3 flex-1 px-14" data-stagger>
-        <div className="bg-stone-900 rounded-xl p-3 text-[12px] leading-snug">
-          <pre className="text-green-400">{`// Kirim data dengan constructor
-Navigator.push(
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-stone-900 rounded-xl p-3 text-[11px] leading-snug">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-accent mb-2">// Kirim data</div>
+            <pre className="text-green-400">{`Navigator.push(
   context,
   MaterialPageRoute(
     builder: (ctx) => DetailPage(
@@ -69,10 +70,11 @@ Navigator.push(
       id: 42,
     ),
   ),
-);
-
-// Terima data di DetailPage
-class DetailPage extends StatelessWidget {
+);`}</pre>
+          </div>
+          <div className="bg-stone-900 rounded-xl p-3 text-[11px] leading-snug">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-accent mb-2">// Terima data</div>
+            <pre className="text-green-400">{`class DetailPage extends StatelessWidget {
   final String title;
   final int id;
 
@@ -80,14 +82,13 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(ctx) {
-    return Column(
-      children: [
-        Text(title),
-        Text('ID: $id'),
-      ],
-    );
+    return Column(children: [
+      Text(title),
+      Text('ID: \$id'),
+    ]);
   }
 }`}</pre>
+          </div>
         </div>
         <div className="mt-3 bg-accent-soft rounded-xl p-3">
           <h4 className="font-bold text-accent text-sm mb-1">Analogi: Kirim Paket</h4>
